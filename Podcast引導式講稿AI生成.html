@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Podcast 腳本設計嚮導</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn { animation: fadeIn 0.4s ease-out forwards; }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-slideUp { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        
+        .step-content { display: none; }
+        .step-content.active { display: block; }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-100 font-sans text-slate-900 selection:bg-blue-200">
+
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
+        <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center text-white shadow-md">
+                    <i data-lucide="mic" class="w-6 h-6"></i>
+                </div>
+                <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-cyan-700">
+                    Podcast 腳本設計嚮導
+                </h1>
+            </div>
+            <div class="text-sm text-slate-500 font-medium" id="header-step-indicator">
+                步驟 1 / 6
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-8 pb-24">
+        
+        <div class="mb-10">
+            <div class="flex justify-between relative">
+                <!-- 背景線條 -->
+                <div class="absolute top-1/2 left-0 w-full h-1 bg-slate-200 -translate-y-1/2 z-0 rounded-full"></div>
+                <!-- 進度線條 -->
+                <div id="progress-bar-fill" class="absolute top-1/2 left-0 h-1 bg-blue-500 -translate-y-1/2 z-0 rounded-full transition-all duration-500 ease-in-out" style="width: 0%;"></div>
+                
+                <!-- 步驟點 (1~6) 將由 JS 動態更新樣式 -->
+                <div class="step-indicator relative z-10 flex flex-col items-center gap-2 cursor-pointer group" onclick="setStep(1)">
+                    <div id="step-icon-1" class="w-12 h-12 rounded-full flex items-center justify-center border-4 transition-all duration-300 shadow-sm bg-blue-600 border-blue-100 text-white transform scale-110">
+                        <i data-lucide="user" class="w-5 h-5"></i>
+                    </div>
+                    <span id="step-text-1" class="text-xs font-semibold whitespace-nowrap hidden sm:block text-blue-700">給予身分</span>
+                </div>
+                <div class="step-indicator relative z-10 flex flex-col items-center gap-2 cursor-pointer group" onclick="setStep(2)">
+                    <div id="step-icon-2" class="w-12 h-12 rounded-full flex items-center justify-center border-4 transition-all duration-300 shadow-sm bg-white border-slate-200 text-slate-400 group-hover:border-blue-200">
+                        <i data-lucide="mic" class="w-5 h-5"></i>
+                    </div>
+                    <span id="step-text-2" class="text-xs font-semibold whitespace-nowrap hidden sm:block text-slate-400">製作主題</span>
+                </div>
+                <div class="step-indicator relative z-10 flex flex-col items-center gap-2 cursor-pointer group" onclick="setStep(3)">
+                    <div id="step-icon-3" class="w-12 h-12 rounded-full flex items-center justify-center border-4 transition-all duration-300 shadow-sm bg-white border-slate-200 text-slate-400 group-hover:border-blue-200">
+                        <i data-lucide="sparkles" class="w-5 h-5"></i>
+                    </div>
+                    <span id="step-text-3" class="text-xs font-semibold whitespace-nowrap hidden sm:block text-slate-400">節目風格</span>
+                </div>
+                <div class="step-indicator relative z-10 flex flex-col items-center gap-2 cursor-pointer group" onclick="setStep(4)">
+                    <div id="step-icon-4" class="w-12 h-12 rounded-full flex items-center justify-center border-4 transition-all duration-300 shadow-sm bg-white border-slate-200 text-slate-400 group-hover:border-blue-200">
+                        <i data-lucide="layout-list" class="w-5 h-5"></i>
+                    </div>
+                    <span id="step-text-4" class="text-xs font-semibold whitespace-nowrap hidden sm:block text-slate-400">腳本設計</span>
+                </div>
+                <div class="step-indicator relative z-10 flex flex-col items-center gap-2 cursor-pointer group" onclick="setStep(5)">
+                    <div id="step-icon-5" class="w-12 h-12 rounded-full flex items-center justify-center border-4 transition-all duration-300 shadow-sm bg-white border-slate-200 text-slate-400 group-hover:border-blue-200">
+                        <i data-lucide="check-circle" class="w-5 h-5"></i>
+                    </div>
+                    <span id="step-text-5" class="text-xs font-semibold whitespace-nowrap hidden sm:block text-slate-400">查證與潤飾</span>
+                </div>
+                <div class="step-indicator relative z-10 flex flex-col items-center gap-2 cursor-pointer group" onclick="setStep(6)">
+                    <div id="step-icon-6" class="w-12 h-12 rounded-full flex items-center justify-center border-4 transition-all duration-300 shadow-sm bg-white border-slate-200 text-slate-400 group-hover:border-blue-200">
+                        <i data-lucide="file-text" class="w-5 h-5"></i>
+                    </div>
+                    <span id="step-text-6" class="text-xs font-semibold whitespace-nowrap hidden sm:block text-slate-400">輸出講稿</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 p-6 md:p-10 mb-8 min-h-[400px]">
+            
+            <!-- 步驟 1：給予身分 -->
+            <div id="step-1-content" class="step-content active space-y-6 animate-fadeIn">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">步驟 1：節目與身分設定</h2>
+                    <p class="text-gray-600">設定你的節目名稱、主持人，以及你們在這個節目中的角色定位。</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">節目名稱</label>
+                        <input type="text" id="input-programName" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="例如：《聲入海心》">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">主持人姓名 (多位請用頓號分隔)</label>
+                        <input type="text" id="input-hostNames" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="例如：陳同學、石同學">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">主持人的身分與視角</label>
+                    <textarea id="input-identity" class="w-full h-24 p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none shadow-sm" placeholder="例如：我們是關心環境議題的高中生，想用平易近人的方式探討嚴肅議題..."></textarea>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <span class="text-sm text-gray-500 py-1">靈感：</span>
+                    <button onclick="fillFormData('programName', '《聲入海心》'); fillFormData('hostNames', '陳小明、石小華'); fillFormData('identity', '我們是高二的海洋特派員，對生態保育有熱忱，希望能以客觀、平衡的角度帶領聽眾了解海洋議題。')" class="px-3 py-1 text-sm bg-blue-50 text-blue-700 rounded-full hover:bg-blue-100 transition-colors">
+                        填入學校企劃書範例設定
+                    </button>
+                </div>
+            </div>
+
+            <!-- 步驟 2：製作主題 -->
+            <div id="step-2-content" class="step-content space-y-6 animate-fadeIn">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">步驟 2：主題與觀點 (平衡報導)</h2>
+                    <p class="text-gray-600">這是本作業的核心。請填寫探討的主題，並列出「正方」與「反方」觀點，做到平衡報導。</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">本集主題</label>
+                    <input id="input-topic" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none mb-4" placeholder="例如：白海豚轉不轉彎？──離岸風電對中華白海豚的影響">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">正反方論述 (平衡報導素材)</label>
+                    <textarea id="input-viewpoints" class="w-full h-40 p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none shadow-sm" placeholder="正方觀點：... &#10;反方觀點：... &#10;個人總結觀點：..."></textarea>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <span class="text-sm text-gray-500 py-1">靈感：</span>
+                    <button onclick="fillFormData('topic', '白海豚轉不轉彎？──離岸風電對中華白海豚的影響'); fillFormData('viewpoints', '【正方觀點：支持離岸風電】\n1. 發展再生能源有助於降低碳排，符合國際淨零趨勢。\n2. 政府與企業已設置施工緩衝區與生態監測機制，可兼顧環保與產業。\n3. 風電建設帶動地方就業與產業升級，創造長期經濟效益。\n\n【反方觀點：關注海洋生態】\n1. 施工噪音與振動恐影響白海豚的導航與覓食。\n2. 補償與監測措施缺乏長期驗證。\n3. 棲地切割可能導致族群減少，應尋求替代區域。')" class="px-3 py-1 text-sm bg-blue-50 text-blue-700 rounded-full hover:bg-blue-100 transition-colors">
+                        填入「離岸風電vs白海豚」資料
+                    </button>
+                </div>
+
+                <!-- Example Section -->
+                <div class="mt-6 bg-slate-50 border border-slate-200 rounded-xl overflow-hidden transition-all">
+                    <button onclick="toggleExample('example-2', 'icon-example-2')" class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-slate-100 transition-colors">
+                        <div class="flex items-center gap-2 text-slate-700 font-medium">
+                            <i data-lucide="book-open" class="w-5 h-5 text-blue-600"></i>
+                            參考《Podcast企畫書》範例：正反觀點呈現
+                        </div>
+                        <i id="icon-example-2" data-lucide="chevron-down" class="w-5 h-5 text-slate-400 transition-transform"></i>
+                    </button>
+                    <div id="example-2" class="hidden p-4 border-t border-slate-200 text-sm text-slate-600 space-y-3 whitespace-pre-wrap leading-relaxed bg-white">
+<span class="font-semibold text-slate-800">【企劃書規範：呈現蒐集到的多方觀點】</span>
+<br><span class="text-green-700 font-medium">- 正方觀點（支持離岸風電）</span>
+<br>　　1.發展再生能源有助於降低碳排，符合國際淨零趨勢。
+<br>　　2.政府與企業已設置施工緩衝區與生態監測機制，可兼顧環保與產業。
+<br>　　3.風電建設帶動地方就業與產業升級，創造長期經濟效益。
+<br><span class="text-red-700 font-medium">- 反方觀點（關注海洋生態）</span>
+<br>　　1.施工噪音與振動恐影響白海豚的導航與覓食。
+<br>　　2.補償與監測措施缺乏長期驗證。
+<br>　　3.棲地切割可能導致族群減少，應尋求替代區域。
+                    </div>
+                </div>
+            </div>
+
+            <!-- 步驟 3：節目風格 -->
+            <div id="step-3-content" class="step-content space-y-6 animate-fadeIn">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">步驟 3：節目風格</h2>
+                    <p class="text-gray-600">決定節目的氛圍，這會影響腳本對話的語氣和引言的風格。</p>
+                </div>
+                <textarea id="input-style" class="w-full h-32 p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none shadow-sm" placeholder="例如：輕鬆自然，像是在跟朋友喝咖啡聊天一樣..."></textarea>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <button onclick="fillFormData('style', '請使用「生態式」的引言風格。帶點感性與反思，例如以動物的視角出發，語氣要自然，像朋友聊天。')" class="p-3 border border-gray-200 rounded-xl text-left hover:border-blue-500 hover:bg-blue-50 transition-all text-sm text-gray-700">引言風格：生態式</button>
+                    <button onclick="fillFormData('style', '請使用「平衡報導式」的引言風格。強調事物的一體兩面（例如能源與生態的代價），對話要理性且具啟發性。')" class="p-3 border border-gray-200 rounded-xl text-left hover:border-blue-500 hover:bg-blue-50 transition-all text-sm text-gray-700">引言風格：平衡報導式</button>
+                    <button onclick="fillFormData('style', '請使用「新聞開場風格」的引言。營造出兩股力量正在交鋒的緊張感與專業感，但後續對話要保持親切。')" class="p-3 border border-gray-200 rounded-xl text-left hover:border-blue-500 hover:bg-blue-50 transition-all text-sm text-gray-700">引言風格：新聞開場</button>
+                    <button onclick="fillFormData('style', '請使用「哲理式」的引言風格。探討永續與共存的真正意義，不分輸贏，語氣溫和且引人深思。')" class="p-3 border border-gray-200 rounded-xl text-left hover:border-blue-500 hover:bg-blue-50 transition-all text-sm text-gray-700">引言風格：哲理式</button>
+                </div>
+
+                <!-- Example Section -->
+                <div class="mt-6 bg-slate-50 border border-slate-200 rounded-xl overflow-hidden transition-all">
+                    <button onclick="toggleExample('example-3', 'icon-example-3')" class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-slate-100 transition-colors">
+                        <div class="flex items-center gap-2 text-slate-700 font-medium">
+                            <i data-lucide="book-open" class="w-5 h-5 text-blue-600"></i>
+                            參考《Podcast企畫書》範例：開場引言風格
+                        </div>
+                        <i id="icon-example-3" data-lucide="chevron-down" class="w-5 h-5 text-slate-400 transition-transform"></i>
+                    </button>
+                    <div id="example-3" class="hidden p-4 border-t border-slate-200 text-sm text-slate-600 space-y-3 whitespace-pre-wrap leading-relaxed bg-white">
+<span class="font-semibold text-slate-800">【企劃書規範：可選擇以下幾種引言風格】</span>
+<br>
+<br><span class="font-medium">範例一（生態式）</span>
+<br>「當海上的風機一座座轉動...有沒有一雙眼睛在海浪下默默注視著我們？那是一隻中華白海豚...」
+<br><span class="font-medium">範例二（平衡報導式）</span>
+<br>「當我們談論能源轉型...每一度電的背後，可能是一條生命的代價？離岸風電不僅帶動經濟，也掀起生態的浪。」
+<br><span class="font-medium">範例三（新聞開場風格）</span>
+<br>「彰化外海，一場看不見的拔河正在上演...一端是推動綠能，一端是瀕臨絕種的白海豚...」
+<br><span class="font-medium">範例四（哲理式）</span>
+<br>「我們總說要守護海洋，但當保育與發展發生衝突時，我們又該怎麼選？也許真正的永續，不在於誰贏誰輸...」
+                    </div>
+                </div>
+            </div>
+
+            <!-- 步驟 4：腳本設計 -->
+            <div id="step-4-content" class="step-content space-y-6 animate-fadeIn">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">步驟 4：腳本設計</h2>
+                    <p class="text-gray-600">規劃節目的結構，確保包含開場、段落、結尾與音樂過場安排。</p>
+                </div>
+                <textarea id="input-structure" class="w-full h-48 p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none shadow-sm" placeholder="例如：\n1. 開場與引言 (約1分鐘)\n2. 簡述主題背景 (約1分鐘)\n3. 正反觀點交鋒 (約2分鐘)\n4. 個人觀點總結與結尾 (約1分鐘)"></textarea>
+                <div class="flex justify-end">
+                    <button onclick="fillFormData('structure', '請依序包含以下結構（總長約3-5分鐘）：\n1. 【開場和前言】：包含一段吸引人的引言，並帶入固定的Slogan開場白。\n2. 【正文-背景知識】：簡述議題歷史或背景。\n3. 【正文-觀點探討】：兩位主持人透過對話，交替提出正方與反方的觀點。\n4. 【總結】：提出主持人的共同結論，並感謝收聽。')" class="px-4 py-2 text-sm bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors">
+                        填入企劃書標準結構
+                    </button>
+                </div>
+
+                <!-- Example Section -->
+                <div class="mt-6 bg-slate-50 border border-slate-200 rounded-xl overflow-hidden transition-all">
+                    <button onclick="toggleExample('example-4', 'icon-example-4')" class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-slate-100 transition-colors">
+                        <div class="flex items-center gap-2 text-slate-700 font-medium">
+                            <i data-lucide="book-open" class="w-5 h-5 text-blue-600"></i>
+                            參考《Podcast企畫書》範例：節目架構規定
+                        </div>
+                        <i id="icon-example-4" data-lucide="chevron-down" class="w-5 h-5 text-slate-400 transition-transform"></i>
+                    </button>
+                    <div id="example-4" class="hidden p-4 border-t border-slate-200 text-sm text-slate-600 space-y-3 whitespace-pre-wrap leading-relaxed bg-white">
+<span class="font-semibold text-slate-800">【企劃書規範：節目架構】</span>
+<br>★須有開場、段落、結尾、音樂、一集節目時長目前先設定3-5分鐘。
+<br>
+<br><span class="font-medium">一、開場和前言</span>
+<br>1. 包含引言、開場標語、節目名稱、主持人名字、節目主題。
+<br>
+<br><span class="font-medium">二、正文</span>
+<br>1. 簡述節目主題的背景知識。
+<br>2. 呈現蒐集到的正反觀點(或多種不同立場的觀點)。
+<br>
+<br><span class="font-medium">三、總結</span>
+<br>1. 提出你對此議題個人觀點 (尋找平衡點)。
+<br>2. 結論/感謝收聽。
+<br>
+<br><span class="text-blue-600 font-medium">★注意：段落之間必須插入「過場音樂(s)」標記。</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 步驟 5：查證與潤飾 -->
+            <div id="step-5-content" class="step-content space-y-6 animate-fadeIn">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">步驟 5：查證與潤飾</h2>
+                    <p class="text-gray-600">這是確保你的 Podcast 聽起來自然、不像是念稿的關鍵設定。</p>
+                </div>
+                <textarea id="input-refinement" class="w-full h-32 p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none shadow-sm" placeholder="例如：請確保對話自然，兩位主持人要有互動感，並且必須嚴格遵守過場音樂的格式..."></textarea>
+                <div class="flex flex-col gap-2">
+                    <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                        <input type="checkbox" id="check-interaction" class="rounded text-blue-600 focus:ring-blue-500">
+                        強調「雙人互動感」與「語氣詞」
+                    </label>
+                    <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                        <input type="checkbox" id="check-objective" class="rounded text-blue-600 focus:ring-blue-500">
+                        強調客觀查證與平衡報導精神
+                    </label>
+                </div>
+
+                <!-- Example Section -->
+                <div class="mt-6 bg-slate-50 border border-slate-200 rounded-xl overflow-hidden transition-all">
+                    <button onclick="toggleExample('example-5', 'icon-example-5')" class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-slate-100 transition-colors">
+                        <div class="flex items-center gap-2 text-slate-700 font-medium">
+                            <i data-lucide="book-open" class="w-5 h-5 text-blue-600"></i>
+                            參考《Podcast企畫書》範例：對話稿潤飾範例
+                        </div>
+                        <i id="icon-example-5" data-lucide="chevron-down" class="w-5 h-5 text-slate-400 transition-transform"></i>
+                    </button>
+                    <div id="example-5" class="hidden p-4 border-t border-slate-200 text-sm text-slate-600 space-y-3 whitespace-pre-wrap leading-relaxed bg-white">
+<span class="font-semibold text-slate-800">【企劃書規範：講稿細節範例】</span>
+<br>(可以參考企劃書中的逐字稿範例，學習如何製造互動感)
+<br>
+<br><span class="text-blue-700">石：欸~欸~你知道最近新聞上都在講離岸風電嗎？感覺整個台灣海岸都在蓋風機耶！</span>
+<br><span class="text-green-700">陳：有啊，政府不是說要發展綠能、邁向淨零碳排嗎？他們說這是為了減少對化石燃料的依賴...</span>
+<br><span class="text-blue-700">石：對，不過我看到一些報導說，彰化外海的風場計畫好像跟中華白海豚的棲地重疊...</span>
+<br><span class="text-green-700">陳：沒錯，中華白海豚可是台灣特有的瀕危物種喔！</span>
+<br>
+<br><span class="font-medium text-slate-600">★ 重點：使用「欸~」、「對」、「沒錯」等語氣詞，並讓兩人的對話像是在接球一樣流暢，而不是長篇大論的背稿。</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 步驟 6：輸出講稿 -->
+            <div id="step-6-content" class="step-content space-y-6 animate-fadeIn">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">步驟 6：輸出講稿</h2>
+                    <p class="text-gray-600">你的完美提示詞已經準備好了！你可以自行複製去其他地方使用，或者直接讓系統為你生成講稿。</p>
+                </div>
+                
+                <!-- 提示詞區塊 -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 relative group">
+                    <h3 class="text-sm font-semibold text-slate-500 mb-2 uppercase tracking-wider">為你量身打造的提示詞 (Prompt)</h3>
+                    <textarea id="output-prompt" readonly class="w-full h-48 bg-transparent text-slate-700 resize-none outline-none text-sm"></textarea>
+                    
+                    <button onclick="handleCopy('output-prompt', 'btn-copy-prompt')" id="btn-copy-prompt" class="absolute top-4 right-4 p-2 bg-white border border-slate-200 rounded-lg shadow-sm hover:bg-slate-50 transition-colors flex items-center gap-1 text-sm text-slate-600">
+                        <i data-lucide="copy" class="w-4 h-4 icon-copy"></i>
+                        <i data-lucide="check" class="w-4 h-4 icon-check hidden text-green-500"></i>
+                        <span class="btn-text">複製提示詞</span>
+                    </button>
+                </div>
+
+                <!-- 生成按鈕 -->
+                <div class="flex justify-center pt-2">
+                    <button id="btn-generate" onclick="generateScript()" class="flex items-center gap-2 px-8 py-4 rounded-full text-white font-bold text-lg shadow-lg transition-all transform hover:scale-105 active:scale-95 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700">
+                        <i data-lucide="sparkles" class="w-6 h-6 icon-normal"></i>
+                        <i data-lucide="loader-2" class="w-6 h-6 icon-loading hidden animate-spin"></i>
+                        <span id="btn-generate-text">立即生成 Podcast 講稿</span>
+                    </button>
+                </div>
+
+                <!-- 錯誤訊息 -->
+                <div id="error-msg" class="hidden p-4 bg-red-50 text-red-600 rounded-xl text-center text-sm border border-red-200">
+                </div>
+
+                <!-- AI 輸出區塊 -->
+                <div id="ai-output-container" class="hidden mt-8 bg-white border border-blue-200 shadow-xl shadow-blue-100/50 rounded-2xl overflow-hidden animate-slideUp">
+                    <div class="bg-blue-50 px-6 py-4 border-b border-blue-100 flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="play" class="w-5 h-5 text-blue-600"></i>
+                            <h3 class="font-bold text-blue-900">生成的 Podcast 講稿</h3>
+                        </div>
+                        <button onclick="handleCopy('raw-ai-output', 'btn-copy-script')" id="btn-copy-script" class="flex items-center gap-1 px-3 py-1.5 bg-white border border-blue-200 rounded-md text-sm text-blue-700 hover:bg-blue-50 transition-colors shadow-sm">
+                            <i data-lucide="copy" class="w-4 h-4 icon-copy"></i>
+                            <i data-lucide="check" class="w-4 h-4 icon-check hidden text-green-500"></i>
+                            <span class="btn-text">複製講稿</span>
+                        </button>
+                    </div>
+                    <div class="p-6 bg-slate-50/50">
+                        <div id="html-formatted-output" class="max-w-none text-slate-800 text-base font-serif tracking-wide border border-slate-200 p-8 rounded-lg bg-white shadow-inner">
+                            <!-- 格式化的內容會顯示在這裡 -->
+                        </div>
+                    </div>
+                </div>
+                <!-- 隱藏的 textarea 存放未經 html 轉換的原始結果，供複製使用 -->
+                <textarea id="raw-ai-output" class="hidden"></textarea>
+            </div>
+            
+        </div>
+
+        <!-- 底部控制列 -->
+        <div class="flex items-center justify-between">
+            <button id="btn-prev" onclick="setStep(state.step - 1)" class="flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-colors opacity-0 pointer-events-none bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 shadow-sm">
+                <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                上一步
+            </button>
+
+            <button id="btn-next" onclick="setStep(state.step + 1)" class="flex items-center gap-2 px-8 py-3 rounded-xl font-bold bg-blue-600 text-white shadow-md hover:bg-blue-700 hover:shadow-lg transition-all active:scale-95">
+                下一步
+                <i data-lucide="chevron-right" class="w-5 h-5"></i>
+            </button>
+        </div>
+    </main>
+
+    <script>
+        // 初始化 Lucide 圖示
+        lucide.createIcons();
+
+        // 應用程式狀態管理
+        const state = {
+            step: 1,
+            formData: {
+                programName: '',
+                hostNames: '',
+                identity: '',
+                topic: '',
+                viewpoints: '',
+                style: '',
+                structure: '',
+                refinement: ''
+            },
+            isGenerating: false,
+            aiOutputText: ''
+        };
+
+        const totalSteps = 6;
+        const inputFields = ['programName', 'hostNames', 'identity', 'topic', 'viewpoints', 'style', 'structure', 'refinement'];
+
+        // 綁定輸入框事件
+        inputFields.forEach(field => {
+            const el = document.getElementById(`input-${field}`);
+            if (el) {
+                el.addEventListener('input', (e) => {
+                    state.formData[field] = e.target.value;
+                    if (state.step === 6) updatePromptText();
+                });
+            }
+        });
+
+        // 綁定 Checkbox 事件 (步驟5)
+        const checkInteraction = document.getElementById('check-interaction');
+        const checkObjective = document.getElementById('check-objective');
+        const txtInteraction = "這是一份兩人對話的腳本，請務必製造兩位主持人的「互動感」，例如適時打斷、附和（像是加點『對啊』、『真的假的』等語氣詞），不能只是各自念一大段稿子。";
+        const txtObjective = "所有的數據、法規或生物習性必須準確無誤。如提及雙方立場，請保持中立不偏頗，呈現真實的「平衡報導」精神。";
+
+        function updateRefinementCheckbox(checkbox, textToAdd) {
+            checkbox.addEventListener('change', (e) => {
+                let current = state.formData.refinement;
+                if (e.target.checked) {
+                    current = (current + '\n' + textToAdd).trim();
+                } else {
+                    current = current.replace(textToAdd, '').trim();
+                }
+                state.formData.refinement = current;
+                document.getElementById('input-refinement').value = current;
+                if (state.step === 6) updatePromptText();
+            });
+        }
+        updateRefinementCheckbox(checkInteraction, txtInteraction);
+        updateRefinementCheckbox(checkObjective, txtObjective);
+
+
+        // 快速填入表單
+        function fillFormData(field, value) {
+            state.formData[field] = value;
+            document.getElementById(`input-${field}`).value = value;
+            if (state.step === 6) updatePromptText();
+        }
+
+        // 切換步驟
+        function setStep(newStep) {
+            if (newStep < 1 || newStep > totalSteps) return;
+            
+            // 每次換步驟時先隱藏所有的 example
+            hideAllExamples();
+            
+            state.step = newStep;
+            
+            // 更新進度條 UI
+            document.getElementById('header-step-indicator').innerText = `步驟 ${state.step} / ${totalSteps}`;
+            const progressPercent = ((state.step - 1) / (totalSteps - 1)) * 100;
+            document.getElementById('progress-bar-fill').style.width = `${progressPercent}%`;
+
+            // 更新圓點樣式
+            for (let i = 1; i <= totalSteps; i++) {
+                const iconContainer = document.getElementById(`step-icon-${i}`);
+                const textSpan = document.getElementById(`step-text-${i}`);
+                
+                // 重置所有樣式
+                iconContainer.className = "w-12 h-12 rounded-full flex items-center justify-center border-4 transition-all duration-300 shadow-sm group-hover:border-blue-200";
+                textSpan.className = "text-xs font-semibold whitespace-nowrap hidden sm:block text-slate-400";
+                
+                if (i === state.step) {
+                    iconContainer.classList.add("bg-blue-600", "border-blue-100", "text-white", "transform", "scale-110");
+                    textSpan.classList.replace("text-slate-400", "text-blue-700");
+                } else if (i < state.step) {
+                    iconContainer.classList.add("bg-blue-500", "border-white", "text-white");
+                    textSpan.classList.replace("text-slate-400", "text-blue-600");
+                    // 已完成的步驟可以放勾勾 (這裡保持原本的圖標以維持 html 簡單性，原React有切換Check)
+                } else {
+                    iconContainer.classList.add("bg-white", "border-slate-200", "text-slate-400");
+                }
+            }
+
+            // 更新內容區塊
+            for (let i = 1; i <= totalSteps; i++) {
+                const content = document.getElementById(`step-${i}-content`);
+                if (i === state.step) {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
+            }
+
+            // 更新按鈕狀態
+            const btnPrev = document.getElementById('btn-prev');
+            const btnNext = document.getElementById('btn-next');
+            
+            if (state.step === 1) {
+                btnPrev.classList.add('opacity-0', 'pointer-events-none');
+            } else {
+                btnPrev.classList.remove('opacity-0', 'pointer-events-none');
+            }
+
+            if (state.step === totalSteps) {
+                btnNext.style.display = 'none';
+                updatePromptText(); // 進入最後一步時更新提示詞
+            } else {
+                btnNext.style.display = 'flex';
+            }
+        }
+
+        // 開關企劃書範例
+        function toggleExample(contentId, iconId) {
+            const content = document.getElementById(contentId);
+            const icon = document.getElementById(iconId);
+            
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.setAttribute('data-lucide', 'chevron-up');
+            } else {
+                content.classList.add('hidden');
+                icon.setAttribute('data-lucide', 'chevron-down');
+            }
+            lucide.createIcons({ name: 'chevron-up' });
+            lucide.createIcons({ name: 'chevron-down' });
+        }
+        
+        function hideAllExamples() {
+            [2,3,4,5].forEach(num => {
+                const content = document.getElementById(`example-${num}`);
+                const icon = document.getElementById(`icon-example-${num}`);
+                if(content && !content.classList.contains('hidden')){
+                    content.classList.add('hidden');
+                    icon.setAttribute('data-lucide', 'chevron-down');
+                }
+            });
+            lucide.createIcons({ name: 'chevron-down' });
+        }
+
+        // 產生提示詞
+        function updatePromptText() {
+            const prompt = `請嚴格根據以下指示，為我撰寫一份完整的 Podcast 講稿。這是一份要求「平衡報導」與「特定格式」的節目：
+
+【1. 節目基本資訊】
+- 節目名稱：${state.formData.programName || '《聲入海心》'}
+- 主持人：${state.formData.hostNames || '主持人A、主持人B'}（請使用雙人或多人對話形式）
+- 主持人身分設定：${state.formData.identity || '關心海洋議題的學生特派員'}
+
+【2. 節目主題與核心觀點】
+- 探討主題：${state.formData.topic || '未指定主題'}
+- 正反方觀點與平衡報導內容：
+${state.formData.viewpoints || '請自行客觀分析此議題的支持與反對意見。'}
+
+【3. 節目風格】
+${state.formData.style || '輕鬆自然，像朋友聊天但具備知識性。'}
+
+【4. 腳本架構與段落】
+${state.formData.structure || '包含：開場、背景介紹、正反觀點探討、總結與個人心得。'}
+
+【5. 特殊格式與潤飾要求 (非常重要，請嚴格遵守)】
+1. 必須使用對話劇本格式，標明說話者。★【重要命名規則】：請使用主持人的「名字」來標明說話者，不要帶姓氏。例如：若主持人為「陳小明」，對話開頭請寫「小明：」；若為「石小華」，請寫「小華：」。唯一的例外是：若主持人全名只有兩個字（單名，例如「林添」），則請使用全名「林添：」。絕對不要只寫姓氏（例如錯誤示範：「陳：」）。
+2. 開場必須包含固定句型：「海洋的聲音，用心來聆聽，大家好，歡迎來到（節目名稱），我們是今天的海洋特派員，我是（主持人1全名），我是（主持人2全名）。今天要探討的主題是...」
+3. 在段落切換時，必須插入過場音樂標記，格式為：\`----------------------------過場音樂(s)------------------------------\`
+4. 講稿細節要求：${state.formData.refinement || '口語化，避免生硬念稿。'}
+5. 【極度重要】：請只輸出純文字！絕對、絕對不要在講者名稱或任何地方使用 Markdown 符號（例如：不要寫 \`**小明：**\`，只要寫 \`小明：\` 即可）。不要使用粗體、斜體、標題等任何 Markdown 標記！
+
+請直接輸出講稿內容，不需多餘解釋。`;
+            document.getElementById('output-prompt').value = prompt;
+        }
+
+        // 複製功能
+        function handleCopy(sourceId, btnId) {
+            const textToCopy = document.getElementById(sourceId).value;
+            
+            const el = document.createElement('textarea');
+            el.value = textToCopy;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+
+            const btn = document.getElementById(btnId);
+            const iconCopy = btn.querySelector('.icon-copy');
+            const iconCheck = btn.querySelector('.icon-check');
+            const btnText = btn.querySelector('.btn-text');
+
+            iconCopy.classList.add('hidden');
+            iconCheck.classList.remove('hidden');
+            const originalText = btnText.innerText;
+            btnText.innerText = '已複製';
+
+            setTimeout(() => {
+                iconCopy.classList.remove('hidden');
+                iconCheck.classList.add('hidden');
+                btnText.innerText = originalText;
+            }, 2000);
+        }
+
+        // 將講稿轉為 HTML (凸排效果)
+        function formatScriptToHtml(text) {
+            if (!text) return '';
+            const lines = text.split('\n');
+            let htmlContent = '';
+            
+            lines.forEach(line => {
+                if (line.trim() === '') {
+                    // 略過空行，不加入 <br />
+                    return;
+                }
+                
+                if (line.includes('---')) {
+                    // 縮小過場音樂標記上下的間距
+                    htmlContent += `<div class="text-center text-slate-500 my-2 text-sm font-mono">${line}</div>`;
+                    return;
+                }
+                
+                const colonIndex = line.indexOf('：') !== -1 ? line.indexOf('：') : line.indexOf(':');
+                if (colonIndex !== -1 && colonIndex < 10) {
+                    const speaker = line.substring(0, colonIndex + 1);
+                    const content = line.substring(colonIndex + 1).trim();
+                    // 移除 mb-2，讓對話行距更緊湊
+                    htmlContent += `<div class="leading-relaxed" style="padding-left: 4em; text-indent: -4em;"><span class="font-bold text-blue-900">${speaker}</span> ${content}</div>`;
+                } else {
+                    // 移除 mb-2
+                    htmlContent += `<div class="leading-relaxed">${line}</div>`;
+                }
+            });
+            
+            return htmlContent;
+        }
+
+        // 呼叫 Gemini API
+        async function generateScript() {
+            if (state.isGenerating) return;
+            
+            const btnGenerate = document.getElementById('btn-generate');
+            const iconNormal = btnGenerate.querySelector('.icon-normal');
+            const iconLoading = btnGenerate.querySelector('.icon-loading');
+            const btnText = document.getElementById('btn-generate-text');
+            const errorContainer = document.getElementById('error-msg');
+            const outputContainer = document.getElementById('ai-output-container');
+            const promptText = document.getElementById('output-prompt').value;
+
+            // UI 狀態：載入中
+            state.isGenerating = true;
+            btnGenerate.classList.replace('bg-gradient-to-r', 'bg-blue-400');
+            btnGenerate.classList.remove('hover:from-blue-700', 'hover:to-cyan-700');
+            btnGenerate.classList.add('cursor-not-allowed');
+            iconNormal.classList.add('hidden');
+            iconLoading.classList.remove('hidden');
+            btnText.innerText = 'AI 正在為您撰寫講稿中...';
+            errorContainer.classList.add('hidden');
+            outputContainer.classList.add('hidden');
+
+            const apiKey = ""; // 系統自動注入
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            
+            const payload = {
+                contents: [{ parts: [{ text: promptText }] }],
+                systemInstruction: { parts: [{ text: "你是一個專業的Podcast腳本撰寫專家。請嚴格根據用戶提供的架構、風格和身分設定來撰寫，確保腳本生動、專業且適合口播。" }] }
+            };
+
+            const fetchWithRetry = async (retries = 5) => {
+                const delays = [1000, 2000, 4000, 8000, 16000];
+                for (let i = 0; i < retries; i++) {
+                    try {
+                        const response = await fetch(url, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        
+                        if (!response.ok) throw new Error(`API 請求失敗 (${response.status})`);
+                        
+                        const data = await response.json();
+                        if (data.candidates && data.candidates[0].content.parts[0].text) {
+                            return data.candidates[0].content.parts[0].text;
+                        } else {
+                            throw new Error("API 回應格式異常");
+                        }
+                    } catch (error) {
+                        if (i === retries - 1) throw error;
+                        await new Promise(res => setTimeout(res, delays[i]));
+                    }
+                }
+            };
+
+            try {
+                const result = await fetchWithRetry();
+                state.aiOutputText = result;
+                
+                // 更新原始講稿 (供複製)
+                document.getElementById('raw-ai-output').value = result;
+                // 更新畫面排版
+                document.getElementById('html-formatted-output').innerHTML = formatScriptToHtml(result);
+                
+                outputContainer.classList.remove('hidden');
+            } catch (err) {
+                errorContainer.innerText = "生成講稿時發生錯誤，請稍後再試或檢查網路連線。";
+                errorContainer.classList.remove('hidden');
+                console.error(err);
+            } finally {
+                // UI 狀態：復原
+                state.isGenerating = false;
+                btnGenerate.classList.remove('bg-blue-400', 'cursor-not-allowed');
+                btnGenerate.classList.add('bg-gradient-to-r', 'hover:from-blue-700', 'hover:to-cyan-700');
+                iconNormal.classList.remove('hidden');
+                iconLoading.classList.add('hidden');
+                btnText.innerText = '立即生成 Podcast 講稿';
+            }
+        }
+    </script>
+</body>
+</html>
