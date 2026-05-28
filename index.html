@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>海洋教育Pocast成果展示區</title>
+    <title>海洋教育 Podcast 平台</title>
     <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- 引入 Font Awesome 用於圖標 -->
@@ -30,369 +30,411 @@
         }
     </script>
     <style>
-        /* 自定義滾動條 */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        .dark ::-webkit-scrollbar-track {
-            background: #1e293b;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-        
-        /* 簡單的打字機光標效果 */
-        .typing-cursor::after {
-            content: '|';
-            animation: blink 1s step-end infinite;
-        }
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-        }
-
-        /* 專案卡片懸停效果 */
-        .project-card {
+        .podcast-card {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        .project-card:hover {
+        .podcast-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
         }
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
     </style>
 </head>
+<body class="bg-gray-50 text-gray-800 dark:bg-dark dark:text-gray-200 transition-colors duration-300 font-sans flex flex-col min-h-screen">
 
-<body class="bg-light text-slate-800 dark:bg-dark dark:text-slate-200 font-sans transition-colors duration-300">
-
-    <!-- 導航列 -->
-    <nav class="fixed w-full z-50 top-0 transition-all duration-300 backdrop-blur-md bg-white/70 dark:bg-slate-900/80 border-b border-gray-200 dark:border-slate-800" id="navbar">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <!-- Logo -->
-                <div class="flex-shrink-0 flex items-center">
-                    <a href="#" class="text-2xl font-bold text-primary tracking-tighter">Ocean<span class="text-slate-800 dark:text-white">Podcast</span></a>
-                </div>
+    <!-- 導覽列 Navbar -->
+    <nav class="bg-white dark:bg-slate-800 shadow-md sticky top-0 z-50 transition-colors duration-300">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-water text-primary text-2xl"></i>
+                <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-teal-400">海洋教育 Podcast</span>
+            </div>
+            
+            <!-- 桌面版選單 -->
+            <div class="hidden md:flex space-x-6 items-center">
+                <a href="#" class="hover:text-primary transition-colors font-medium">首頁</a>
+                <a href="#production" class="hover:text-primary transition-colors font-medium">1. 製作網頁</a>
+                <a href="#results" class="hover:text-primary transition-colors font-medium">2. 成果展示</a>
                 
-                <!-- 桌面版選單 -->
-                <div class="hidden md:flex space-x-8 items-center">
-                    <a href="#home" class="hover:text-primary transition-colors font-medium">首頁</a>
-                    <a href="#showcase" class="hover:text-primary transition-colors font-medium">作品展示</a>
-                    
-                    <!-- 深色模式切換按鈕 -->
-                    <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors" aria-label="切換深色模式">
-                        <i class="fas fa-moon dark:hidden text-slate-700"></i>
-                        <i class="fas fa-sun hidden dark:block text-yellow-400"></i>
-                    </button>
-                </div>
+                <!-- 暗黑模式切換按鈕 -->
+                <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors focus:outline-none">
+                    <i id="theme-toggle-dark-icon" class="hidden fas fa-moon text-gray-500 dark:text-gray-400"></i>
+                    <i id="theme-toggle-light-icon" class="hidden fas fa-sun text-yellow-500"></i>
+                </button>
+            </div>
 
-                <!-- 手機版選單按鈕 -->
-                <div class="md:hidden flex items-center space-x-4">
-                    <button id="mobile-theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors">
-                        <i class="fas fa-moon dark:hidden text-slate-700"></i>
-                        <i class="fas fa-sun hidden dark:block text-yellow-400"></i>
-                    </button>
-                    <button id="mobile-menu-btn" class="text-slate-800 dark:text-white hover:text-primary focus:outline-none">
-                        <i class="fas fa-bars text-2xl"></i>
-                    </button>
-                </div>
+            <!-- 手機版選單按鈕 -->
+            <div class="md:hidden flex items-center">
+                <button id="theme-toggle-mobile" class="p-2 mr-2 rounded-full hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors focus:outline-none">
+                    <i id="theme-toggle-dark-icon-mobile" class="hidden fas fa-moon text-gray-500 dark:text-gray-400"></i>
+                    <i id="theme-toggle-light-icon-mobile" class="hidden fas fa-sun text-yellow-500"></i>
+                </button>
+                <button id="mobile-menu-button" class="text-gray-500 hover:text-primary focus:outline-none p-2">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
             </div>
         </div>
-
-        <!-- 手機版下拉選單 -->
-        <div id="mobile-menu" class="hidden md:hidden bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 absolute w-full">
-            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 shadow-lg">
-                <a href="#home" class="mobile-link block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-100 dark:hover:bg-slate-800">首頁</a>
-                <a href="#showcase" class="mobile-link block px-3 py-2 rounded-md text-base font-medium hover:bg-gray-100 dark:hover:bg-slate-800">作品展示</a>
-            </div>
+        
+        <!-- 手機版選單內容 -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white dark:bg-slate-800 border-t dark:border-slate-700">
+            <a href="#" class="block px-4 py-3 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">首頁</a>
+            <a href="#production" class="block px-4 py-3 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">1. 製作網頁</a>
+            <a href="#results" class="block px-4 py-3 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">2. 成果展示</a>
         </div>
     </nav>
 
-    <!-- 英雄區段 (Hero Section) -->
-    <section id="home" class="min-h-screen flex items-center justify-center pt-16 relative overflow-hidden bg-gradient-to-br from-slate-900 via-dark to-slate-800 text-white">
-        <!-- 背景裝飾 -->
-        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-primary rounded-full mix-blend-screen filter blur-[100px] opacity-40 animate-blob"></div>
-        <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600 rounded-full mix-blend-screen filter blur-[100px] opacity-40 animate-blob animation-delay-2000"></div>
-        
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full flex flex-col items-center text-center">
-            
-            <p class="text-primary font-bold tracking-[0.3em] uppercase mb-4 text-sm md:text-base">Ocean Education Podcast</p>
-            
-            <!-- 標題區域 -->
-            <h1 class="text-5xl md:text-7xl lg:text-8xl font-extrabold leading-tight mb-6 tracking-tighter drop-shadow-lg">
-                海洋教育Pocast成果展示區
-            </h1>
-            
-            <!-- 副標題打字效果 -->
-            <h2 class="text-3xl md:text-4xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
-                <span id="typing-course" class="typing-cursor"></span>
-            </h2>
-            
-            <!-- 授課老師徽章 -->
-            <div class="mb-10 px-6 py-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-xl inline-block transform hover:scale-105 transition-transform cursor-default">
-                <p class="text-xl font-medium text-white flex items-center">
-                    <i class="fas fa-chalkboard-teacher mr-3 text-primary"></i> 授課老師：林咨任
-                </p>
-            </div>
-            
-            <p class="text-lg md:text-xl text-slate-300 max-w-2xl mx-auto mb-12 leading-relaxed">
-                以聲音記錄海洋教育的學習成果，匯集學生製作的 Podcast 作品，呈現議題探索、腳本設計、配音剪輯與媒體表達的完整歷程。
-            </p>
-            
-            <!-- 動作按鈕 -->
-            <div class="flex justify-center">
-                <a href="#showcase" class="px-8 py-4 rounded-xl bg-primary text-white font-bold text-lg shadow-lg shadow-blue-500/30 hover:bg-blue-600 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center">
-                    <i class="fas fa-podcast mr-3 text-xl"></i> 觀看 Podcast 成果
-                </a>
+    <!-- 頁首 Hero 區塊 -->
+    <header class="bg-gradient-to-r from-blue-600 to-teal-500 text-white py-16 transition-colors duration-300">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 drop-shadow-md">海洋教育 Podcast 整合平台</h1>
+            <p class="text-lg md:text-xl max-w-2xl mx-auto opacity-90 mb-8">從製作到發表，一站式體驗。探索豐富的海洋知識，聆聽學生們精彩的創作成果。</p>
+            <div class="flex justify-center space-x-4">
+                <a href="#production" class="bg-white text-blue-600 px-6 py-2 rounded-full font-semibold hover:bg-blue-50 transition-colors shadow-lg">開始製作</a>
+                <a href="#results" class="bg-transparent border-2 border-white px-6 py-2 rounded-full font-semibold hover:bg-white hover:text-blue-600 transition-colors shadow-lg">欣賞成果</a>
             </div>
         </div>
-        
-        <!-- 向下滾動提示 -->
-        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce hidden md:block">
-            <a href="#showcase" class="text-slate-400 hover:text-white transition-colors">
-                <i class="fas fa-chevron-down text-3xl"></i>
-            </a>
-        </div>
-    </section>
+    </header>
 
-    <!-- Podcast 成果展示 (Showcase) -->
-    <section id="showcase" class="py-20 bg-white dark:bg-slate-800/50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4">Podcast 成果專區</h2>
-                <div class="w-20 h-1 bg-primary mx-auto rounded-full"></div>
-                <p class="mt-4 text-slate-600 dark:text-slate-400">本區資料擷取自 GitHub 倉庫「-AI-」中的 Podcast 成果展示資料夾；原Podcast區已下架，Podcast區已刪除。</p>
-                <a href="https://github.com/igudesman2012-rssh/-AI-.git" target="_blank" rel="noopener noreferrer" class="inline-flex items-center mt-5 px-4 py-2 rounded-full bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors text-sm font-semibold">
-                    <i class="fab fa-github mr-2"></i> 資料來源：GitHub Repository
-                </a>
-            </div>
+    <main class="flex-grow">
+        <!-- 第一部分：Podcast 製作網頁 -->
+        <section id="production" class="py-16 bg-white dark:bg-slate-900 border-b dark:border-slate-800 scroll-mt-16">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-12">
+                    <span class="text-primary font-semibold tracking-wider uppercase text-sm">Part 1</span>
+                    <h2 class="text-3xl md:text-4xl font-bold mt-2 text-gray-800 dark:text-white">Podcast 製作網頁</h2>
+                    <div class="h-1 w-20 bg-primary mx-auto mt-4 rounded"></div>
+                    <p class="mt-4 text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                        使用我們專屬的線上製作工具，輕鬆錄製、剪輯，並加入豐富的音效與配樂，打造屬於你的海洋教育 Podcast 節目！
+                    </p>
+                </div>
 
-            <!-- Podcast 成果專區 -->
-            <div>
-                <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 border-b border-gray-200 dark:border-slate-700 pb-4 gap-4">
-                    <div class="flex items-center">
-                        <div class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center mr-4 text-blue-500">
-                            <i class="fas fa-podcast text-2xl"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-2xl md:text-3xl font-bold text-slate-800 dark:text-white">Podcast 成果展示</h3>
-                            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">點擊卡片即可進入全螢幕播放與瀏覽成果。</p>
+                <div class="max-w-4xl mx-auto bg-blue-50 dark:bg-slate-800 rounded-2xl p-8 md:p-12 shadow-inner border border-blue-100 dark:border-slate-700 flex flex-col md:flex-row items-center justify-between">
+                    <div class="md:w-1/2 mb-6 md:mb-0 text-center md:text-left">
+                        <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-3">準備好開始錄製了嗎？</h3>
+                        <ul class="text-gray-600 dark:text-gray-300 space-y-2 mb-6">
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i> 簡單易用的錄音介面</li>
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i> 內建多種海洋環境音效</li>
+                            <li><i class="fas fa-check-circle text-green-500 mr-2"></i> 快速剪輯與匯出功能</li>
+                        </ul>
+                        <a href="Podcast製作網站.html" target="_blank" class="inline-flex items-center justify-center bg-primary text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-blue-600 transition-all transform hover:scale-105 shadow-lg">
+                            <i class="fas fa-headphones mr-3"></i> 進入 Podcast 製作網頁
+                        </a>
+                    </div>
+                    <div class="md:w-1/2 flex justify-center">
+                        <!-- 示意插圖 -->
+                        <div class="relative w-64 h-64 bg-white dark:bg-slate-700 rounded-full shadow-xl flex items-center justify-center border-4 border-blue-200 dark:border-slate-600">
+                            <i class="fas fa-microphone-alt text-6xl text-primary animate-pulse"></i>
+                            <div class="absolute top-4 right-4 bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-1 rounded-full transform rotate-12">New!</div>
                         </div>
                     </div>
-                    <span class="self-start md:self-auto px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full text-xs font-bold text-slate-500">現有資料庫</span>
-                </div>
-                <div id="podcasts-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Podcast 成果卡片動態生成 -->
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- 全螢幕播放器 Modal -->
-    <div id="fullscreen-player-modal" class="fixed inset-0 z-[100] hidden bg-black flex items-center justify-center">
-        <!-- 關閉按鈕 (提示使用者或作為備用) -->
-        <button id="close-player-btn" class="absolute top-6 right-6 z-[110] text-white/70 hover:text-white bg-slate-900/50 hover:bg-red-600 rounded-full w-12 h-12 flex items-center justify-center transition-all shadow-lg backdrop-blur-sm group" title="離開全螢幕 (ESC)">
-            <i class="fas fa-times text-2xl group-hover:rotate-90 transition-transform duration-300"></i>
-        </button>
-        <!-- 全螢幕載入提示 -->
-        <div id="fs-loading" class="absolute z-[105] text-white flex flex-col items-center">
-            <div class="animate-spin rounded-full h-16 w-16 border-4 border-primary border-t-transparent mb-4"></div>
-            <p class="animate-pulse tracking-widest text-lg font-medium">載入中...</p>
-        </div>
-        <!-- 全螢幕 Iframe -->
-        <iframe id="fullscreen-iframe" class="w-full h-full border-0 relative z-[100] bg-black" sandbox="allow-scripts allow-same-origin allow-popups allow-pointer-lock"></iframe>
-    </div>
+        <!-- 第二部分：學生 Podcast 成果區 -->
+        <section id="results" class="py-16 bg-gray-50 dark:bg-dark scroll-mt-16">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-10">
+                    <span class="text-primary font-semibold tracking-wider uppercase text-sm">Part 2</span>
+                    <h2 class="text-3xl md:text-4xl font-bold mt-2 text-gray-800 dark:text-white">學生 Podcast 成果區</h2>
+                    <div class="h-1 w-20 bg-primary mx-auto mt-4 rounded"></div>
+                </div>
+
+                <!-- 搜尋與過濾區 (原本的功能) -->
+                <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm">
+                    <div class="w-full md:w-1/3 relative">
+                        <input type="text" id="search-input" placeholder="搜尋節目名稱或描述..." 
+                               class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors">
+                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                    </div>
+                    <div class="flex space-x-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto">
+                        <button class="filter-btn active bg-primary text-white px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors" data-filter="all">全部</button>
+                        <button class="filter-btn bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-slate-600 px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors" data-filter="ecology">生態保育</button>
+                        <button class="filter-btn bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-slate-600 px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors" data-filter="culture">海洋文化</button>
+                        <button class="filter-btn bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-slate-600 px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors" data-filter="energy">海洋能源</button>
+                    </div>
+                </div>
+
+                <!-- Podcast 列表網格 (原本的功能) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="podcast-grid">
+                    
+                    <!-- 項目 1 (改為使用相對路徑呼叫 iframe 或直接連結，此處以按鈕觸發全螢幕播放器為例) -->
+                    <div class="podcast-card bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-md flex flex-col h-full border border-gray-100 dark:border-slate-700" data-category="energy">
+                        <div class="relative pb-[56.25%] bg-gray-200 dark:bg-slate-700">
+                            <!-- 縮圖 -->
+                            <img src="igudesman2012-rssh/-ai-/-AI--462d5cbd72954f61061039e79500512220b433ba/01-圖片/01-北部基隆協和電廠可用圖片/01-電廠遠景.jpg" alt="協和電廠遠景" class="absolute inset-0 w-full h-full object-cover">
+                            <!-- 播放按鈕疊加層 -->
+                            <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 cursor-pointer play-btn" data-player-src="podcast_player (2).html">
+                                <div class="bg-primary text-white rounded-full w-14 h-14 flex items-center justify-center">
+                                    <i class="fas fa-play text-xl ml-1"></i>
+                                </div>
+                            </div>
+                            <span class="absolute top-2 right-2 bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded shadow">能源</span>
+                        </div>
+                        <div class="p-5 flex flex-col flex-grow">
+                            <h3 class="text-xl font-bold mb-2 text-gray-800 dark:text-white line-clamp-1">EP01. 認識協和電廠</h3>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2 flex-grow">
+                                探索北部基隆協和電廠的歷史與未來，了解能源轉型對當地海洋生態的影響。
+                            </p>
+                            <div class="flex justify-between items-center mt-auto pt-4 border-t border-gray-100 dark:border-slate-700">
+                                <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                                    <i class="far fa-calendar-alt mr-1"></i> 2024/05/20
+                                </div>
+                                <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                                    <i class="far fa-clock mr-1"></i> 12:45
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 項目 2 -->
+                    <div class="podcast-card bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-md flex flex-col h-full border border-gray-100 dark:border-slate-700" data-category="ecology">
+                        <div class="relative pb-[56.25%] bg-gray-200 dark:bg-slate-700">
+                            <img src="igudesman2012-rssh/-ai-/-AI--462d5cbd72954f61061039e79500512220b433ba/01-圖片/01-北部基隆協和電廠可用圖片/08-番仔澳水晶宮大型扇珊瑚.jpg" alt="大型扇珊瑚" class="absolute inset-0 w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 cursor-pointer play-btn" data-player-src="podcast_player (2).html">
+                                <div class="bg-primary text-white rounded-full w-14 h-14 flex items-center justify-center">
+                                    <i class="fas fa-play text-xl ml-1"></i>
+                                </div>
+                            </div>
+                            <span class="absolute top-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded shadow">生態</span>
+                        </div>
+                        <div class="p-5 flex flex-col flex-grow">
+                            <h3 class="text-xl font-bold mb-2 text-gray-800 dark:text-white line-clamp-1">EP02. 水晶宮的秘密</h3>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2 flex-grow">
+                                潛入番仔澳，一探壯觀的大型扇珊瑚群，呼籲大家共同保護這片美麗的海洋森林。
+                            </p>
+                            <div class="flex justify-between items-center mt-auto pt-4 border-t border-gray-100 dark:border-slate-700">
+                                <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                                    <i class="far fa-calendar-alt mr-1"></i> 2024/05/22
+                                </div>
+                                <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                                    <i class="far fa-clock mr-1"></i> 18:20
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 項目 3 -->
+                    <div class="podcast-card bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-md flex flex-col h-full border border-gray-100 dark:border-slate-700" data-category="culture">
+                        <div class="relative pb-[56.25%] bg-gray-200 dark:bg-slate-700">
+                            <!-- 使用角色圖片作為示意 -->
+                            <div class="absolute inset-0 bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
+                                <img src="igudesman2012-rssh/-ai-/-AI--462d5cbd72954f61061039e79500512220b433ba/01-圖片/05-角色模板/02-達悟長老(去).png" alt="達悟長老" class="h-3/4 object-contain drop-shadow-lg">
+                            </div>
+                            <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 cursor-pointer play-btn" data-player-src="podcast_player (2).html">
+                                <div class="bg-primary text-white rounded-full w-14 h-14 flex items-center justify-center">
+                                    <i class="fas fa-play text-xl ml-1"></i>
+                                </div>
+                            </div>
+                            <span class="absolute top-2 right-2 bg-purple-500 text-white text-xs font-bold px-2 py-1 rounded shadow">文化</span>
+                        </div>
+                        <div class="p-5 flex flex-col flex-grow">
+                            <h3 class="text-xl font-bold mb-2 text-gray-800 dark:text-white line-clamp-1">EP03. 傾聽海的聲音</h3>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2 flex-grow">
+                                達悟長老講述代代相傳的海洋故事，帶領我們認識原住民族與海洋共生的智慧。
+                            </p>
+                            <div class="flex justify-between items-center mt-auto pt-4 border-t border-gray-100 dark:border-slate-700">
+                                <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                                    <i class="far fa-calendar-alt mr-1"></i> 2024/05/25
+                                </div>
+                                <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                                    <i class="far fa-clock mr-1"></i> 22:15
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 無結果提示 (預設隱藏) -->
+                    <div id="no-results" class="hidden col-span-full py-12 text-center text-gray-500 dark:text-gray-400">
+                        <i class="fas fa-search-minus text-4xl mb-4 opacity-50"></i>
+                        <p class="text-lg">找不到符合條件的 Podcast 節目</p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </main>
 
     <!-- 頁尾 -->
-    <footer class="bg-white dark:bg-slate-900 py-8 border-t border-gray-200 dark:border-slate-800 text-center">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center">
-            <p class="text-slate-500 dark:text-slate-400 mb-4 md:mb-0">
-                &copy; <span id="year"></span> Ocean Podcast Showcase. All rights reserved.
+    <footer class="bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-800 pt-10 pb-6 transition-colors duration-300 mt-auto">
+        <div class="container mx-auto px-4 text-center">
+            <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">海洋教育 Podcast 計畫</h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
+                致力於透過數位聲音媒介，推廣海洋保育、能源永續與在地文化，讓每個聲音都能成為守護海洋的力量。
             </p>
-            <p class="text-slate-500 dark:text-slate-400 text-sm">
-                Podcast resources from GitHub repository & Hosted on GitHub Pages
-            </p>
+            <div class="flex justify-center space-x-4 mb-6">
+                <a href="#" class="w-10 h-10 rounded-full bg-gray-100 dark:bg-slate-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-primary hover:text-white transition-colors"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="w-10 h-10 rounded-full bg-gray-100 dark:bg-slate-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-primary hover:text-white transition-colors"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="w-10 h-10 rounded-full bg-gray-100 dark:bg-slate-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-primary hover:text-white transition-colors"><i class="fab fa-youtube"></i></a>
+            </div>
+            <div class="text-sm text-gray-500 dark:text-gray-500">
+                &copy; 2024 海洋教育 Podcast 專案團隊. All rights reserved.
+            </div>
         </div>
     </footer>
 
-    <!-- 回到頂部按鈕 -->
-    <a href="#home" id="back-to-top" class="fixed bottom-8 right-8 bg-primary text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg opacity-0 pointer-events-none transition-all duration-300 hover:bg-secondary hover:-translate-y-1 z-40">
-        <i class="fas fa-arrow-up"></i>
-    </a>
-
-    <!-- 互動腳本 -->
-    <script>
-        // 設定當前年份
-        document.getElementById('year').textContent = new Date().getFullYear();
-
-        // 打字機效果 (課程副標題)
-        const texts = ["海洋教育 Podcast", "學生聲音作品", "媒體素養實作", "議題探究成果"];
-        let textIndex = 0;
-        let charIndex = 0;
-        let isDeleting = false;
-        const typingElement = document.getElementById('typing-course');
-
-        function type() {
-            if (!typingElement) return;
-            const currentText = texts[textIndex];
-            
-            if (isDeleting) {
-                typingElement.textContent = currentText.substring(0, charIndex - 1);
-                charIndex--;
-            } else {
-                typingElement.textContent = currentText.substring(0, charIndex + 1);
-                charIndex++;
-            }
-
-            let typeSpeed = 100;
-            if (isDeleting) typeSpeed /= 2;
-
-            if (!isDeleting && charIndex === currentText.length) {
-                typeSpeed = 2000; // 停頓時間
-                isDeleting = true;
-            } else if (isDeleting && charIndex === 0) {
-                isDeleting = false;
-                textIndex = (textIndex + 1) % texts.length;
-                typeSpeed = 500;
-            }
-
-            setTimeout(type, typeSpeed);
-        }
-
-        // 啟動打字效果
-        setTimeout(type, 1000);
-
-        // 深色模式切換邏輯
-        const themeToggleBtns = [document.getElementById('theme-toggle'), document.getElementById('mobile-theme-toggle')];
+    <!-- 全螢幕播放器 Modal (隱藏 iframe 容器) -->
+    <div id="player-modal" class="fixed inset-0 z-[100] bg-black hidden flex-col">
+        <!-- 關閉按鈕 -->
+        <button id="close-player-btn" class="absolute top-4 right-4 z-50 text-white bg-black bg-opacity-50 hover:bg-red-600 rounded-full w-12 h-12 flex items-center justify-center transition-colors focus:outline-none">
+            <i class="fas fa-times text-2xl"></i>
+        </button>
         
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        <!-- Iframe 容器 -->
+        <div class="flex-grow w-full h-full">
+            <iframe id="fullscreen-iframe" src="" frameborder="0" class="w-full h-full bg-black" allow="autoplay; fullscreen"></iframe>
+        </div>
+    </div>
+
+    <!-- JavaScript 邏輯 -->
+    <script>
+        // --- 深色模式切換邏輯 ---
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+        const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+        
+        const themeToggleBtnMobile = document.getElementById('theme-toggle-mobile');
+        const themeToggleDarkIconMobile = document.getElementById('theme-toggle-dark-icon-mobile');
+        const themeToggleLightIconMobile = document.getElementById('theme-toggle-light-icon-mobile');
+
+        // 檢查初始狀態
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
+            themeToggleLightIcon.classList.remove('hidden');
+            themeToggleLightIconMobile.classList.remove('hidden');
         } else {
             document.documentElement.classList.remove('dark');
+            themeToggleDarkIcon.classList.remove('hidden');
+            themeToggleDarkIconMobile.classList.remove('hidden');
         }
 
-        themeToggleBtns.forEach(btn => {
-            if(!btn) return;
-            btn.addEventListener('click', () => {
-                document.documentElement.classList.toggle('dark');
-                if (document.documentElement.classList.contains('dark')) {
-                    localStorage.theme = 'dark';
-                } else {
-                    localStorage.theme = 'light';
-                }
-            });
-        });
+        function toggleTheme() {
+            // 切換圖標
+            themeToggleDarkIcon.classList.toggle('hidden');
+            themeToggleLightIcon.classList.toggle('hidden');
+            themeToggleDarkIconMobile.classList.toggle('hidden');
+            themeToggleLightIconMobile.classList.toggle('hidden');
 
-        // 手機版選單切換
-        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            // 切換主題
+            if (localStorage.getItem('color-theme')) {
+                if (localStorage.getItem('color-theme') === 'light') {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                }
+            } else {
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('color-theme', 'light');
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('color-theme', 'dark');
+                }
+            }
+        }
+
+        themeToggleBtn.addEventListener('click', toggleTheme);
+        themeToggleBtnMobile.addEventListener('click', toggleTheme);
+
+        // --- 手機版選單切換 ---
+        const mobileMenuBtn = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
-        const mobileLinks = document.querySelectorAll('.mobile-link');
 
         mobileMenuBtn.addEventListener('click', () => {
             mobileMenu.classList.toggle('hidden');
         });
 
-        mobileLinks.forEach(link => {
+        // 點擊手機版選單連結後自動關閉
+        mobileMenu.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', () => {
                 mobileMenu.classList.add('hidden');
             });
         });
 
-        // 滾動效果：導航列背景 & 回到頂部按鈕
-        const navbar = document.getElementById('navbar');
-        const backToTopBtn = document.getElementById('back-to-top');
+        // --- 搜尋與過濾邏輯 (針對第二部分) ---
+        const searchInput = document.getElementById('search-input');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const podcastCards = document.querySelectorAll('.podcast-card');
+        const noResultsMsg = document.getElementById('no-results');
 
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 50) {
-                navbar.classList.add('shadow-md');
-                backToTopBtn.classList.remove('opacity-0', 'pointer-events-none');
-                backToTopBtn.classList.add('opacity-100', 'pointer-events-auto');
+        function filterPodcasts() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
+            let visibleCount = 0;
+
+            podcastCards.forEach(card => {
+                const title = card.querySelector('h3').textContent.toLowerCase();
+                const desc = card.querySelector('p').textContent.toLowerCase();
+                const category = card.dataset.category;
+                
+                const matchesSearch = title.includes(searchTerm) || desc.includes(searchTerm);
+                const matchesCategory = activeFilter === 'all' || category === activeFilter;
+
+                if (matchesSearch && matchesCategory) {
+                    card.style.display = 'flex';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            if (visibleCount === 0) {
+                noResultsMsg.classList.remove('hidden');
             } else {
-                navbar.classList.remove('shadow-md');
-                backToTopBtn.classList.add('opacity-0', 'pointer-events-none');
-                backToTopBtn.classList.remove('opacity-100', 'pointer-events-auto');
+                noResultsMsg.classList.add('hidden');
             }
+        }
+
+        searchInput.addEventListener('input', filterPodcasts);
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // 移除所有按鈕的 active 樣式
+                filterBtns.forEach(b => {
+                    b.classList.remove('active', 'bg-primary', 'text-white');
+                    b.classList.add('bg-gray-200', 'text-gray-700', 'dark:bg-slate-700', 'dark:text-gray-300');
+                });
+                
+                // 為點擊的按鈕加入 active 樣式
+                btn.classList.add('active', 'bg-primary', 'text-white');
+                btn.classList.remove('bg-gray-200', 'text-gray-700', 'dark:bg-slate-700', 'dark:text-gray-300');
+                
+                filterPodcasts();
+            });
         });
 
-        // ==========================================
-        // GitHub Podcast 成果畫廊與全螢幕播放系統
-        // 資料來源：https://github.com/igudesman2012-rssh/-AI-.git
-        // ==========================================
-        const repositoryUrl = "https://github.com/igudesman2012-rssh/-AI-.git";
-        const podcastProjects = [
-            {
-                title: "海洋教育 Podcast 成果播放器",
-                desc: "整合現有 Podcast 成果展示資料，可進入播放器瀏覽學生作品、圖片、影片、音效與音樂等相關資源。",
-                author: "學生 Podcast 成果集",
-                image: "https://placehold.co/600x400/0ea5e9/ffffff?text=Ocean+Education+Podcast",
-                url: "./04-Podcas6成果展示/podcast_player%20(2).html",
-                repo: repositoryUrl
-            }
-        ];
-
-        const podcastsGrid = document.getElementById('podcasts-grid');
-        
-        // 產生 Podcast 卡片 HTML
-        function generateCardHTML(project, iconClass) {
-            return `
-            <div class="project-card bg-light dark:bg-slate-900 rounded-xl overflow-hidden border border-gray-200 dark:border-slate-700 cursor-pointer flex flex-col h-full min-h-[320px]" 
-                 onclick="openFullscreenPlayer('${project.url}')">
-                <div class="h-44 overflow-hidden relative group bg-slate-800 shrink-0">
-                    <img src="${project.image}" alt="${project.title}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-90 group-hover:opacity-100">
-                    <div class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-sm">
-                        <i class="fas ${iconClass} text-5xl text-white mb-3 shadow-black drop-shadow-lg transform scale-90 group-hover:scale-100 transition-transform"></i>
-                        <span class="text-white font-bold tracking-wider">全螢幕開啟</span>
-                    </div>
-                </div>
-                <div class="p-5 flex flex-col flex-grow">
-                    <div class="flex justify-between items-start mb-2">
-                        <h3 class="text-lg font-bold text-slate-800 dark:text-white">${project.title}</h3>
-                    </div>
-                    <p class="text-slate-600 dark:text-slate-400 mb-4 text-sm flex-grow leading-relaxed">
-                        ${project.desc}
-                    </p>
-                    <div class="space-y-2 text-xs text-slate-500 dark:text-slate-400 pt-3 border-t border-gray-100 dark:border-slate-800">
-                        <div class="flex items-center">
-                            <i class="fas fa-user-graduate mr-2 text-primary"></i> 作者：<span class="font-medium">${project.author}</span>
-                        </div>
-                        <a href="${project.repo}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();" class="inline-flex items-center text-primary hover:underline font-semibold">
-                            <i class="fab fa-github mr-2"></i> 查看資料來源
-                        </a>
-                    </div>
-                </div>
-            </div>
-            `;
-        }
-
-        // 渲染畫面
-        function renderShowcases() {
-            if (podcastsGrid) podcastsGrid.innerHTML = podcastProjects.map(p => generateCardHTML(p, 'fa-circle-play')).join('');
-        }
-        
-        renderShowcases();
-
-        // 全螢幕 Modal 控制邏輯
-        const playerModal = document.getElementById('fullscreen-player-modal');
-        const fsIframe = document.getElementById('fullscreen-iframe');
+        // --- 全螢幕播放器邏輯 ---
+        const playBtns = document.querySelectorAll('.play-btn');
+        const playerModal = document.getElementById('player-modal');
         const closePlayerBtn = document.getElementById('close-player-btn');
-        const fsLoading = document.getElementById('fs-loading');
+        const fsIframe = document.getElementById('fullscreen-iframe');
 
-        function openFullscreenPlayer(url) {
+        playBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const src = btn.getAttribute('data-player-src');
+                if(src) {
+                    openFullscreenPlayer(src);
+                }
+            });
+        });
+
+        function openFullscreenPlayer(src) {
             playerModal.classList.remove('hidden');
-            fsLoading.classList.remove('hidden');
-            fsIframe.style.opacity = '0';
+            playerModal.classList.add('flex');
             
-            fsIframe.src = url;
+            // 載入 iframe 來源
+            fsIframe.src = src;
             
+            // 讓 iframe 獲得焦點，確保鍵盤事件能在裡面運作
             fsIframe.onload = function() {
-                fsLoading.classList.add('hidden');
-                fsIframe.style.opacity = '1';
                 fsIframe.contentWindow.focus(); 
             };
 
@@ -415,6 +457,7 @@
                 }
             }
             playerModal.classList.add('hidden');
+            playerModal.classList.remove('flex');
             fsIframe.src = '';
         }
 
@@ -425,6 +468,7 @@
         const fullscreenChangeHandlers = () => {
             if (!document.fullscreenElement && !document.webkitFullscreenElement) {
                 playerModal.classList.add('hidden');
+                playerModal.classList.remove('flex');
                 fsIframe.src = ''; 
             }
         };
