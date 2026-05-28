@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>專業廣播劇 Podcast 產生器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* ==========================================
+           動畫與特效定義
+           ========================================== */
+        /* 說話彈跳動畫 */
+        @keyframes talking {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        .is-talking { animation: talking 0.4s infinite; }
+        
+        /* 動態字幕專用情緒動畫 */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        /* 呼籲情緒專用發光動畫 */
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 1; text-shadow: 0 0 10px #4ade80, 0 0 20px #4ade80; transform: scale(1); }
+            50% { opacity: 0.8; text-shadow: 0 0 5px #4ade80; transform: scale(1.05); }
+        }
+
+        /* 情緒字體樣式 */
+        .emo-angry { font-size: 3rem !important; color: #ef4444 !important; font-weight: 900 !important; animation: shake 0.5s infinite; }
+        .emo-happy { font-size: 2.5rem !important; color: #fde047 !important; animation: talking 1s infinite; }
+        .emo-shock { font-size: 2.5rem !important; color: #fb923c !important; font-style: italic !important; transform: scale(1.1); }
+        .emo-sad { font-size: 2rem !important; color: #93c5fd !important; opacity: 0.8 !important; }
+        .emo-neutral { font-size: 2rem !important; color: #ffffff !important; }
+        /* 呼籲情緒 (置中、放大、發光閃爍) */
+        .emo-call { font-size: 3.5rem !important; color: #4ade80 !important; font-weight: 900 !important; animation: pulse-glow 1.5s infinite; text-align: center !important; }
+
+        .stage-bg { 
+            transition: background-image 1s ease, background-color 1s ease; 
+            background-size: cover; 
+            background-position: center; 
+            background-blend-mode: overlay;
+        }
+        
+        /* 隱藏捲軸但允許滾動 */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* 角色立牌容器樣式：用於絕對定位與拖曳 */
+        .character-avatar-wrapper {
+            position: absolute;
+            transition: opacity 0.3s ease, z-index 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen font-sans p-4 md:p-6 flex flex-col items-center gap-4 overflow-x-hidden">
+
+    <!-- 標題區塊 (匯出後隱藏) -->
+    <header id="header-area" class="text-center mb-2 w-full">
+        <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">
+            🎙️ 專業廣播劇 Podcast 產生器 (獨立網頁匯出版)
+        </h1>
+        <p class="text-sm text-gray-400 mt-1">支援貼上 GitHub 素材、AI 場景、角色自由拖曳與匯出 HTML 播放器</p>
+    </header>
+
+    <!-- 1. 視覺舞台與動態字幕區塊 -->
+    <section id="stage" class="stage-bg bg-gray-800 bg-gray-900/80 rounded-2xl h-[22rem] md:h-[28rem] flex flex-col items-center justify-center relative border-2 border-gray-700 overflow-hidden shadow-2xl shrink-0 w-full max-w-5xl">
+        
+        <!-- 角色立牌容器 -->
+        <div id="avatars-container" class="relative z-10 w-full h-full mb-12">
+            <div class="absolute inset-0 flex items-center justify-center min-w-[128px] min-h-[128px] pointer-events-none">
+                <span class="text-7xl md:text-8xl drop-shadow-lg opacity-50">👥</span>
+            </div>
+        </div>
+        
+        <!-- 動態字幕顯示區 -->
+        <div class="absolute bottom-6 w-full px-8 text-center z-20 pointer-events-none">
+            <div id="subtitle" class="font-black tracking-wide drop-shadow-[0_4px_4px_rgba(0,0,0,1)] opacity-0 transition-all duration-300 min-h-[3rem] emo-neutral"></div>
+        </div>
+    </section>
+
+    <!-- 播放控制區塊 (預設隱藏，解析後或匯出後顯示) -->
+    <div id="play-area" class="hidden flex-col gap-3 mt-2 w-full max-w-2xl bg-gray-800 p-4 rounded-2xl border border-gray-700 shadow-xl">
+        <p id="play-hint" class="text-yellow-400 text-xs font-bold text-center">準備就緒，點擊下方開始播放 🎬 <br><span class="text-gray-400 font-normal">(播放時可用滑鼠拖曳角色，或滾動滾輪縮放大小)</span></p>
+        <div class="flex flex-wrap gap-2">
+            <button id="btn-play" class="flex-1 min-w-[140px] bg-green-600 hover:bg-green-700 text-white font-bold py-4 text-lg rounded-lg transition-colors flex items-center justify-center gap-2 shadow-lg">
+                ▶️ 開始播放
+            </button>
+            <button id="btn-export-html" class="flex-1 min-w-[200px] bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-lg transition-colors flex items-center justify-center gap-1 shadow-lg text-sm md:text-base">
+                💾 匯出為獨立播放器 (HTML)
+            </button>
+            <button id="btn-stop" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-4 px-6 rounded-lg transition-colors">
+                ⏹️ 停止
+            </button>
+            <button id="btn-back-edit" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-4 px-4 rounded-lg transition-colors shrink-0 flex items-center justify-center">
+                🔙 返回編輯
+            </button>
+        </div>
+    </div>
+
+    <!-- 編輯控制區 (匯出後會隱藏) -->
+    <div id="editor-panels" class="flex flex-col lg:flex-row gap-6 flex-1 min-h-0 w-full max-w-7xl">
+        
+        <!-- 左側：腳本與音樂設定 -->
+        <section class="flex-1 lg:w-2/3 bg-gray-800 rounded-2xl p-5 border border-gray-700 flex flex-col gap-4 overflow-y-auto no-scrollbar shadow-lg">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-700 pb-2 gap-2 mb-2">
+                <h2 class="text-xl font-semibold flex items-center gap-2">📝 1. 劇本與配樂 <span class="text-xs text-gray-400 font-normal">("角色名：台詞")</span></h2>
+                <button id="btn-add-section" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 text-sm font-bold rounded-lg transition-colors shrink-0 shadow-lg">
+                    ➕ 新增段落
+                </button>
+            </div>
+            <div id="sections-container" class="flex flex-col gap-5"></div>
+        </section>
+
+        <!-- 右側：設定與解析控制 -->
+        <section class="flex-1 lg:w-1/3 bg-gray-800 rounded-2xl p-5 border border-gray-700 flex flex-col gap-4 shadow-lg overflow-y-auto no-scrollbar">
+            <h2 class="text-xl font-semibold border-b border-gray-700 pb-2">👥 2. 角色設定</h2>
+            
+            <div id="role-management-area" class="flex flex-col gap-3"></div>
+            <button id="btn-add-role" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 text-sm rounded-lg transition-colors border border-gray-600 shadow">
+                ➕ 新增角色
+            </button>
+
+            <h2 class="text-xl font-semibold border-b border-gray-700 pb-2 mt-2">⚙️ 3. 解析與微調</h2>
+            <div>
+                <label class="block text-xs text-gray-400 mb-1">全域語速 (<span id="rate-value">1.0</span>x)</label>
+                <input type="range" id="rate-slider" min="0.5" max="2" value="1" step="0.1" class="w-full accent-blue-500">
+            </div>
+
+            <button id="btn-generate-storyboard" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-lg transition-colors mt-1 shadow-lg">
+                🎬 1. 解析腳本 (擷取對話與情緒)
+            </button>
+
+            <div id="settings-area" class="hidden flex-col gap-4 mt-2">
+                <div class="flex flex-col gap-2">
+                    <h3 class="text-pink-400 font-bold text-sm mb-1">🎭 情緒與分鏡微調</h3>
+                    <div id="storyboard-list" class="flex flex-col gap-3 max-h-40 overflow-y-auto pr-2"></div>
+                </div>
+                <button id="btn-lock" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg transition-colors mt-2 shadow-lg">
+                    🔒 2. 確認設定並進入播放模式
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <!-- 自訂 Modal 提示視窗 -->
+    <div id="custom-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-[100] p-4 transition-opacity">
+        <div class="bg-gray-800 border border-gray-600 rounded-2xl p-6 max-w-md w-full shadow-2xl flex flex-col gap-4">
+            <h3 id="modal-title" class="text-xl font-bold text-white flex items-center gap-2"></h3>
+            <p id="modal-content" class="text-gray-300 text-sm whitespace-pre-line leading-relaxed"></p>
+            <div class="flex justify-end gap-3 mt-4" id="modal-buttons">
+                <button id="modal-btn-close" class="bg-gray-600 hover:bg-gray-700 text-white px-5 py-2.5 rounded-lg transition-colors font-semibold">關閉</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const apiKey = ""; // Gemini API Key
+        const synth = window.speechSynthesis;
+        let voices = [];
+        let isPlaying = false;
+        let currentCustomAudio = null; 
+        
+        // ==========================================
+        // GitHub 專案圖庫資源設定
+        // ==========================================
+        const GITHUB_BASE_URL = "https://raw.githubusercontent.com/igudesman2012-rssh/-ai-/main/";
+        const githubAssets = {
+            characters: [
+                { name: "小瑞(女寶寶)", path: "01-圖片/05-角色模板/06-瑞祥女寶寶(去).png" },
+                { name: "小祥(男寶寶)", path: "01-圖片/05-角色模板/07-瑞祥男寶寶(去).png" },
+                { name: "武達悟", path: "01-圖片/05-角色模板/01-武達悟(去).png" },
+                { name: "達悟長老", path: "01-圖片/05-角色模板/02-達悟長老(去).png" },
+                { name: "國家公儺", path: "01-圖片/05-角色模板/03-國家公儺(去).png" },
+                { name: "古人", path: "01-圖片/05-角色模板/04-古人(去).png" },
+                { name: "司馬遷", path: "01-圖片/05-角色模板/05-司馬遷(去).png" }
+            ],
+            scenes: [
+                { name: "協和電廠遠景", path: "01-圖片/01-北部基隆協和電廠可用圖片/01-電廠遠景.jpg" },
+                { name: "協和電廠俯瞰", path: "01-圖片/01-北部基隆協和電廠可用圖片/02-電廠俯瞰.jpg" },
+                { name: "電廠場景1", path: "01-圖片/01-北部基隆協和電廠可用圖片/03-電廠場景.jpg" },
+                { name: "電廠場景2", path: "01-圖片/01-北部基隆協和電廠可用圖片/04-電廠場景.jpg" },
+                { name: "北部扇珊瑚", path: "01-圖片/01-北部基隆協和電廠可用圖片/05-北部扇珊瑚.jpg" },
+                { name: "基隆海域珊瑚礁", path: "01-圖片/01-北部基隆協和電廠可用圖片/06-基隆海域珊瑚礁.jpg" },
+                { name: "台灣東北角海岸", path: "01-圖片/01-北部基隆協和電廠可用圖片/07-台灣東北角海岸.jpg" },
+                { name: "潮境海灣保育區", path: "01-圖片/01-北部基隆協和電廠可用圖片/07-基隆-望海港潮境海灣資源保育區.jpg" },
+                { name: "水晶宮大扇珊瑚", path: "01-圖片/01-北部基隆協和電廠可用圖片/08-番仔澳水晶宮大型扇珊瑚.jpg" },
+                { name: "漁具纏繞珊瑚", path: "01-圖片/01-北部基隆協和電廠可用圖片/09-基隆嶼的海扇林壯觀程度媲美水晶宮，但因此處也是漁場之一，水下常可見珊瑚被漁具纏繞的悲慘畫面.jpg" },
+                { name: "潛水員(插畫)", path: "01-圖片/01-北部基隆協和電廠可用圖片/10-潛水員.webp" },
+                { name: "潛水員(實拍)", path: "01-圖片/01-北部基隆協和電廠可用圖片/11-潛水員.jpg" }
+            ]
+        };
+
+        const EMOTIONS = {
+            'neutral': { emoji: '🙂', class: 'emo-neutral', label: '平靜' },
+            'happy':   { emoji: '😆', class: 'emo-happy', label: '開心' },
+            'angry':   { emoji: '😡', class: 'emo-angry', label: '生氣' },
+            'shock':   { emoji: '😲', class: 'emo-shock', label: '驚訝' },
+            'sad':     { emoji: '😢', class: 'emo-sad', label: '感傷' },
+            'call':    { emoji: '📢', class: 'emo-call', label: '呼籲' } 
+        };
+
+        let sectionsData = [];
+        let sectionCounter = 0;
+        const bgmPlayers = [];
+        let rolesList = [
+            { id: 'r1', name: '小瑞', voiceName: '', image: GITHUB_BASE_URL + '01-圖片/05-角色模板/06-瑞祥女寶寶(去).png' },
+            { id: 'r2', name: '小祥', voiceName: '', image: GITHUB_BASE_URL + '01-圖片/05-角色模板/07-瑞祥男寶寶(去).png' }
+        ];
+        let roleCounter = 3;
+
+        const sectionsContainer = document.getElementById('sections-container');
+
+        // ==========================================
+        // Modal & 輔助邏輯
+        // ==========================================
+        function showModal(title, content) {
+            const modalTitle = document.getElementById('modal-title');
+            const modalContent = document.getElementById('modal-content');
+            const customModal = document.getElementById('custom-modal');
+            if(modalTitle) modalTitle.innerHTML = title;
+            if(modalContent) modalContent.textContent = content;
+            if(customModal) customModal.classList.remove('hidden');
+        }
+
+        const btnModalClose = document.getElementById('modal-btn-close');
+        if (btnModalClose) {
+            btnModalClose.addEventListener('click', () => {
+                document.getElementById('custom-modal').classList.add('hidden');
+            });
+        }
+
+        async function getBase64FromUrl(url) {
+            if (!url) return null;
+            if (url.startsWith('data:')) return url; 
+            if (url.startsWith('http')) return url;  
+            
+            try {
+                const response = await fetch(url);
+                const blob = await response.blob();
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                });
+            } catch (e) {
+                console.error("Blob to Base64 conversion failed", e);
+                return url;
+            }
+        }
+
+        // ==========================================
+        // 動態新增與刪除段落
+        // ==========================================
+        function addSection(defaultText = "", defaultBgUrl = "") {
+            const id = sectionCounter++;
+            const div = document.createElement('div');
+            div.className = 'section-card bg-gray-900 p-4 rounded-xl border border-gray-700 flex flex-col gap-3 relative shadow-md';
+            div.dataset.id = id;
+            
+            const sceneOptionsHtml = githubAssets.scenes.map(s => `<option value="${GITHUB_BASE_URL}${s.path}">${s.name}</option>`).join('');
+
+            div.innerHTML = `
+                <div class="flex justify-between items-center mb-1">
+                    <h3 class="font-bold text-lg text-blue-400 section-title">第 X 段</h3>
+                    <button class="btn-delete-section text-red-400 hover:text-red-300 hover:bg-red-900/50 text-sm px-2 py-1 rounded transition-colors bg-gray-800 border border-red-900/50 hidden">🗑️ 刪除</button>
+                </div>
+                <textarea class="script-input w-full bg-gray-800 text-gray-100 border border-gray-600 rounded p-3 focus:outline-none focus:border-blue-500 resize-none h-28" placeholder="輸入腳本 (格式：角色名：台詞)...">${defaultText}</textarea>
+                
+                <div class="flex flex-col gap-3 mt-1 bg-gray-800 p-3 rounded-lg border border-gray-700/80">
+                    <div class="flex flex-col md:flex-row md:items-center gap-2 text-sm text-gray-400">
+                        <label class="whitespace-nowrap text-pink-400 font-bold w-24">🎵 背景 BGM：</label>
+                        <input type="text" class="bgm-url-input flex-1 bg-gray-900 border border-gray-600 rounded p-1.5 text-xs focus:outline-none focus:border-pink-500" placeholder="貼上網址 (如 Github mp3)...">
+                        <span class="text-xs">或上傳:</span>
+                        <input type="file" accept="audio/*" class="bgm-upload w-24 text-xs file:mr-1 file:py-1 file:px-2 file:rounded file:border-0 file:bg-gray-700 file:text-white cursor-pointer">
+                    </div>
+                    <div class="flex flex-col md:flex-row md:items-center gap-2 text-sm text-gray-400 border-t border-gray-700 pt-2">
+                        <label class="whitespace-nowrap text-green-400 font-bold w-24">🎤 自訂配音：</label>
+                        <input type="text" class="voice-url-input flex-1 bg-gray-900 border border-gray-600 rounded p-1.5 text-xs focus:outline-none focus:border-green-500" placeholder="貼上配音網址...">
+                        <span class="text-xs">或上傳:</span>
+                        <input type="file" accept="audio/*" class="voice-upload w-24 text-xs file:mr-1 file:py-1 file:px-2 file:rounded file:border-0 file:bg-gray-700 file:text-white cursor-pointer">
+                    </div>
+                    <div class="flex flex-col md:flex-row md:items-center gap-2 text-sm text-gray-400 border-t border-gray-700 pt-2">
+                        <label class="whitespace-nowrap text-yellow-400 font-bold w-24">🖼️ 自訂場景：</label>
+                        <select class="bg-github-select bg-gray-800 border border-gray-600 rounded p-1.5 text-xs text-gray-300 focus:outline-none w-full md:w-32">
+                            <option value="">-- GitHub 圖庫 --</option>
+                            ${sceneOptionsHtml}
+                        </select>
+                        <input type="text" class="bg-url-input flex-1 bg-gray-900 border border-gray-600 rounded p-1.5 text-xs focus:outline-none focus:border-yellow-500" value="${defaultBgUrl}" placeholder="貼上圖片網址 (留白則由 AI 生成)...">
+                        <span class="text-xs">或上傳:</span>
+                        <input type="file" accept="image/*" class="bg-upload w-24 text-xs file:mr-1 file:py-1 file:px-2 file:rounded file:border-0 file:bg-gray-700 file:text-white cursor-pointer">
+                    </div>
+                </div>
+            `;
+            
+            div.querySelector('.btn-delete-section').addEventListener('click', () => { div.remove(); updateSectionTitles(); });
+
+            const dataObj = { id, text: "", bgmUrl: null, voiceUrl: null, bgImgUrl: defaultBgUrl, transType: 'ocean', storyboard: [] };
+            sectionsData.push(dataObj);
+
+            if (defaultBgUrl) {
+                const options = div.querySelectorAll('.bg-github-select option');
+                options.forEach(opt => { if (opt.value === defaultBgUrl) opt.selected = true; });
+            }
+
+            div.querySelector('.bgm-upload').addEventListener('change', (e) => {
+                if (e.target.files[0]) dataObj.bgmUrl = URL.createObjectURL(e.target.files[0]);
+            });
+            div.querySelector('.voice-upload').addEventListener('change', (e) => {
+                if (e.target.files[0]) dataObj.voiceUrl = URL.createObjectURL(e.target.files[0]);
+            });
+            div.querySelector('.bg-upload').addEventListener('change', (e) => {
+                if (e.target.files[0]) dataObj.bgImgUrl = URL.createObjectURL(e.target.files[0]);
+            });
+
+            div.querySelector('.bgm-url-input').addEventListener('input', (e) => { if(e.target.value.trim()) dataObj.bgmUrl = e.target.value.trim(); });
+            div.querySelector('.voice-url-input').addEventListener('input', (e) => { if(e.target.value.trim()) dataObj.voiceUrl = e.target.value.trim(); });
+            div.querySelector('.bg-url-input').addEventListener('input', (e) => { if(e.target.value.trim()) dataObj.bgImgUrl = e.target.value.trim(); });
+
+            div.querySelector('.bg-github-select').addEventListener('change', (e) => {
+                const urlInput = div.querySelector('.bg-url-input');
+                urlInput.value = e.target.value;
+                dataObj.bgImgUrl = e.target.value;
+            });
+
+            if (sectionsContainer) sectionsContainer.appendChild(div);
+            updateSectionTitles();
+        }
+
+        function updateSectionTitles() {
+            if (!sectionsContainer) return;
+            const cards = sectionsContainer.querySelectorAll('.section-card');
+            cards.forEach((card, idx) => {
+                card.querySelector('.section-title').textContent = `第 ${idx + 1} 段`;
+                const delBtn = card.querySelector('.btn-delete-section');
+                if (idx === 0 && cards.length === 1) delBtn.classList.add('hidden');
+                else delBtn.classList.remove('hidden');
+            });
+        }
+
+        // ==========================================
+        // 角色管理與 URL 支援
+        // ==========================================
+        function renderRolesManager() {
+            const container = document.getElementById('role-management-area');
+            if (!container) return;
+            container.innerHTML = ''; 
+
+            const zhVoices = voices.filter(v => v.lang.includes('zh'));
+            const displayVoices = zhVoices.length > 0 ? zhVoices : voices;
+            
+            const characterOptionsHtml = githubAssets.characters.map(c => `<option value="${GITHUB_BASE_URL}${c.path}">${c.name}</option>`).join('');
+
+            rolesList.forEach((role, index) => {
+                const roleDiv = document.createElement('div');
+                roleDiv.className = 'flex flex-col gap-2 bg-gray-900 p-3 rounded-lg border border-gray-700 relative';
+                
+                if (!role.voiceName && displayVoices.length > 0) role.voiceName = displayVoices[index % displayVoices.length].name;
+
+                roleDiv.innerHTML = `
+                    <div class="flex justify-between items-center gap-2">
+                        <input type="text" value="${role.name}" class="role-name-input w-24 md:w-32 bg-gray-800 text-pink-300 text-sm font-bold p-1 rounded border border-gray-600 focus:outline-none">
+                        
+                        <div class="flex-1 flex flex-col md:flex-row items-end md:items-center gap-1 justify-end">
+                            <select class="role-github-select w-full md:w-28 bg-gray-800 border border-gray-600 rounded p-1 text-[10px] text-gray-300 focus:outline-none">
+                                <option value="">-- GitHub 角色 --</option>
+                                ${characterOptionsHtml}
+                            </select>
+                            <input type="text" class="role-url-input w-full md:w-32 bg-gray-800 border border-gray-600 rounded p-1 text-[10px] text-gray-300 placeholder-gray-500 focus:outline-none focus:border-purple-500" value="${role.image || ''}" placeholder="立繪 URL...">
+                            <label class="text-[10px] bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded cursor-pointer transition-colors text-white border border-gray-600 flex items-center shrink-0">
+                                📁 上傳
+                                <input type="file" accept="image/*" class="hidden role-image-upload">
+                            </label>
+                            <img src="${role.image || ''}" class="role-avatar-preview ${role.image ? '' : 'hidden'} w-8 h-8 ml-1 object-contain drop-shadow-md">
+                            <button class="btn-delete-role ml-1 text-red-400 hover:text-red-300 text-xs ${rolesList.length <= 1 ? 'hidden' : ''}">❌</button>
+                        </div>
+                    </div>
+                    <select class="role-voice-select w-full bg-gray-800 border border-gray-600 rounded p-1.5 text-xs text-gray-200 focus:outline-none"></select>
+                `;
+
+                const select = roleDiv.querySelector('.role-voice-select');
+                displayVoices.forEach(v => {
+                    const opt = document.createElement('option');
+                    opt.value = v.name; opt.textContent = `${v.name} (${v.lang})`;
+                    if (v.name === role.voiceName) opt.selected = true;
+                    select.appendChild(opt);
+                });
+
+                if (role.image) {
+                    const options = roleDiv.querySelectorAll('.role-github-select option');
+                    options.forEach(opt => { if (opt.value === role.image) opt.selected = true; });
+                }
+
+                roleDiv.querySelector('.role-name-input').addEventListener('change', (e) => role.name = e.target.value.trim() || '未命名');
+                select.addEventListener('change', (e) => role.voiceName = e.target.value);
+                
+                roleDiv.querySelector('.btn-delete-role').addEventListener('click', () => {
+                    rolesList = rolesList.filter(r => r.id !== role.id);
+                    renderRolesManager();
+                });
+
+                const previewImg = roleDiv.querySelector('.role-avatar-preview');
+                
+                roleDiv.querySelector('.role-image-upload').addEventListener('change', (e) => {
+                    if (e.target.files[0]) {
+                        const imgUrl = URL.createObjectURL(e.target.files[0]);
+                        role.image = imgUrl;
+                        previewImg.src = imgUrl;
+                        previewImg.classList.remove('hidden');
+                    }
+                });
+                
+                roleDiv.querySelector('.role-url-input').addEventListener('input', (e) => {
+                    if (e.target.value.trim()) {
+                        role.image = e.target.value.trim();
+                        previewImg.src = role.image;
+                        previewImg.classList.remove('hidden');
+                    }
+                });
+
+                roleDiv.querySelector('.role-github-select').addEventListener('change', (e) => {
+                    const urlInput = roleDiv.querySelector('.role-url-input');
+                    urlInput.value = e.target.value;
+                    if (e.target.value) {
+                        role.image = e.target.value;
+                        previewImg.src = role.image;
+                        previewImg.classList.remove('hidden');
+                    } else {
+                        role.image = null;
+                        previewImg.classList.add('hidden');
+                    }
+                });
+
+                container.appendChild(roleDiv);
+            });
+        }
+
+        // ==========================================
+        // 綁定編輯區按鈕事件 (含安全判斷機制)
+        // ==========================================
+        const rateSlider = document.getElementById('rate-slider');
+        if (rateSlider) {
+            rateSlider.addEventListener('input', (e) => {
+                const newRate = parseFloat(e.target.value);
+                document.getElementById('rate-value').textContent = newRate.toFixed(1);
+                if (currentCustomAudio) {
+                    currentCustomAudio.playbackRate = newRate;
+                }
+            });
+        }
+
+        const btnAddSection = document.getElementById('btn-add-section');
+        if (btnAddSection) btnAddSection.addEventListener('click', () => addSection("新角色：請輸入台詞..."));
+
+        const btnAddRole = document.getElementById('btn-add-role');
+        if (btnAddRole) {
+            btnAddRole.addEventListener('click', () => {
+                rolesList.push({ id: 'r' + roleCounter++, name: `新角色${rolesList.length + 1}`, voiceName: '', image: null });
+                renderRolesManager();
+            });
+        }
+
+        function analyzeEmotion(text) {
+            if (/(訂閱|按讚|分享|呼籲|記得|千萬)/.test(text)) return 'call';
+            if (/(開心|高興|讚|棒|歡呼|笑|期待|呵呵)/.test(text)) return 'happy';
+            if (/(生氣|氣憤|怒|糟糕|爛|當機)/.test(text)) return 'angry';
+            if (/(注意|警告|重要|小心)/.test(text)) return 'shock';
+            if (/(難過|哭|悲|慘)/.test(text)) return 'sad';
+            return 'neutral';
+        }
+
+        function parseScript(text) {
+            const lines = text.split('\n');
+            let sentences = [];
+            let currentSpeaker = '旁白'; 
+            lines.forEach(line => {
+                line = line.trim();
+                if (!line) return;
+                let textToSpeak = line;
+                const speakerMatch = line.match(/^(.+?)[：:](.*)$/);
+                if (speakerMatch) {
+                    currentSpeaker = speakerMatch[1].trim();
+                    textToSpeak = speakerMatch[2].trim(); 
+                }
+                const regex = /[^，。！？；]+[，。！？；]*/g;
+                let match, hasPunc = false;
+                while ((match = regex.exec(textToSpeak)) !== null) {
+                    hasPunc = true;
+                    if (match[0].trim().length > 0) sentences.push({ speaker: currentSpeaker, text: match[0].trim(), emotion: analyzeEmotion(match[0].trim()) });
+                }
+                if (!hasPunc && textToSpeak.length > 0) sentences.push({ speaker: currentSpeaker, text: textToSpeak, emotion: analyzeEmotion(textToSpeak) });
+            });
+            return sentences;
+        }
+
+        const btnGen = document.getElementById('btn-generate-storyboard');
+        if (btnGen) {
+            btnGen.addEventListener('click', () => {
+                const listContainer = document.getElementById('storyboard-list');
+                listContainer.innerHTML = ''; 
+                
+                const activeSections = [];
+                const uniqueRolesSet = new Set();
+                const cards = sectionsContainer.querySelectorAll('.section-card');
+
+                cards.forEach((card, idx) => {
+                    const id = parseInt(card.dataset.id);
+                    const dataObj = sectionsData.find(s => s.id === id);
+                    if (!dataObj) return;
+
+                    dataObj.text = card.querySelector('.script-input').value;
+                    dataObj.storyboard = parseScript(dataObj.text);
+                    activeSections.push(dataObj);
+
+                    if (dataObj.storyboard.length > 0) {
+                        const groupDiv = document.createElement('div');
+                        groupDiv.className = 'bg-gray-900 p-2 rounded border border-gray-700';
+                        groupDiv.innerHTML = `<div class="text-xs text-blue-400 font-bold mb-1">第 ${idx+1} 段設定</div>`;
+                        
+                        dataObj.storyboard.forEach((sentence, sIdx) => {
+                            const splitSpeakers = sentence.speaker.split('&').map(s => s.trim());
+                            splitSpeakers.forEach(sp => uniqueRolesSet.add(sp));
+
+                            const row = document.createElement('div');
+                            row.className = 'flex justify-between items-center gap-2 mb-1 border-b border-gray-800 pb-1';
+                            row.innerHTML = `
+                                <span class="text-xs text-pink-300 w-1/4 truncate font-bold">${sentence.speaker}</span>
+                                <span class="text-xs text-gray-300 w-2/4 truncate">${sentence.text}</span>
+                            `;
+                            const select = document.createElement('select');
+                            select.className = 'w-1/4 bg-gray-700 text-xs text-white rounded focus:outline-none';
+                            for (const [key, val] of Object.entries(EMOTIONS)) {
+                                const opt = document.createElement('option'); opt.value = key; opt.textContent = val.label;
+                                if (key === sentence.emotion) opt.selected = true;
+                                select.appendChild(opt);
+                            }
+                            select.addEventListener('change', (e) => dataObj.storyboard[sIdx].emotion = e.target.value);
+                            row.appendChild(select);
+                            groupDiv.appendChild(row);
+                        });
+                        listContainer.appendChild(groupDiv);
+                    }
+                });
+
+                sectionsData = activeSections; 
+
+                let rolesAdded = false;
+                uniqueRolesSet.forEach(speaker => {
+                    if (!rolesList.find(r => r.name === speaker)) {
+                        rolesList.push({ id: 'r' + roleCounter++, name: speaker, voiceName: '', image: null });
+                        rolesAdded = true;
+                    }
+                });
+                if (rolesAdded) renderRolesManager();
+
+                document.getElementById('settings-area').classList.remove('hidden');
+                document.getElementById('settings-area').classList.add('flex');
+                btnGen.textContent = '🎬 重新解析腳本';
+            });
+        }
+
+        const btnLock = document.getElementById('btn-lock');
+        if (btnLock) {
+            btnLock.addEventListener('click', () => {
+                document.getElementById('editor-panels').classList.add('hidden');
+                document.getElementById('header-area').classList.add('hidden');
+                document.getElementById('play-area').classList.remove('hidden');
+                document.getElementById('play-area').classList.add('flex');
+                initStageAvatars();
+            });
+        }
+
+        const btnBackEdit = document.getElementById('btn-back-edit');
+        if (btnBackEdit) {
+            btnBackEdit.addEventListener('click', () => {
+                isPlaying = false;
+                synth.cancel();
+                bgmPlayers.forEach(p => { p.pause(); p.volume = 0; });
+                if (currentCustomAudio) { currentCustomAudio.pause(); currentCustomAudio = null; }
+                resetStage();
+                
+                document.getElementById('play-area').classList.add('hidden');
+                document.getElementById('play-area').classList.remove('flex');
+                document.getElementById('editor-panels').classList.remove('hidden');
+                document.getElementById('header-area').classList.remove('hidden');
+                
+                document.getElementById('settings-area').classList.add('hidden');
+                document.getElementById('settings-area').classList.remove('flex');
+                if (document.getElementById('btn-generate-storyboard')) {
+                    document.getElementById('btn-generate-storyboard').textContent = '🎬 1. 解析腳本 (擷取對話與情緒)';
+                }
+
+                avatarsContainer.innerHTML = `
+                    <div class="absolute inset-0 flex items-center justify-center min-w-[128px] min-h-[128px] pointer-events-none">
+                        <span class="text-7xl md:text-8xl drop-shadow-lg opacity-50">👥</span>
+                    </div>
+                `;
+                stage.style.backgroundImage = 'none';
+            });
+        }
+
+        // ==========================================
+        // 核心：編譯並匯出獨立 HTML 播放器
+        // ==========================================
+        const btnExportHtml = document.getElementById('btn-export-html');
+        if (btnExportHtml) {
+            btnExportHtml.addEventListener('click', async () => {
+                const btn = document.getElementById('btn-export-html');
+                const originalText = btn.textContent;
+                btn.textContent = '⏳ 正在封裝素材 (請稍候)...';
+                btn.disabled = true;
+
+                try {
+                    let exportRoles = JSON.parse(JSON.stringify(rolesList));
+                    let exportSections = JSON.parse(JSON.stringify(sectionsData));
+                    
+                    for (let role of exportRoles) {
+                        // 只轉換本機上傳的圖片 (不轉換已經是 GitHub 網址的連結)
+                        if (role.image && !role.image.startsWith('http')) role.image = await getBase64FromUrl(role.image);
+                    }
+                    for (let sec of exportSections) {
+                        if (sec.bgmUrl && !sec.bgmUrl.startsWith('http')) sec.bgmUrl = await getBase64FromUrl(sec.bgmUrl);
+                        if (sec.voiceUrl && !sec.voiceUrl.startsWith('http')) sec.voiceUrl = await getBase64FromUrl(sec.voiceUrl);
+                        if (sec.bgImgUrl && !sec.bgImgUrl.startsWith('http')) sec.bgImgUrl = await getBase64FromUrl(sec.bgImgUrl);
+                    }
+
+                    const cloneDoc = document.cloneNode(true);
+                    
+                    // 【安全防護】徹底移除編輯相關介面，防止匯出版當機
+                    cloneDoc.getElementById('editor-panels')?.remove();
+                    cloneDoc.getElementById('header-area')?.remove();
+                    cloneDoc.getElementById('btn-export-html')?.remove(); 
+                    cloneDoc.getElementById('btn-back-edit')?.remove();
+                    
+                    const body = cloneDoc.body;
+                    body.className = "bg-gray-900 text-gray-100 min-h-screen font-sans p-4 md:p-8 flex flex-col items-center justify-center gap-6 overflow-x-hidden";
+                    
+                    const dataScript = document.createElement('script');
+                    dataScript.innerHTML = `
+                        window.__IS_EXPORTED_PLAYER = true;
+                        window.__EXPORTED_ROLES = ${JSON.stringify(exportRoles)};
+                        window.__EXPORTED_SECTIONS = ${JSON.stringify(exportSections)};
+                    `;
+                    cloneDoc.head.appendChild(dataScript);
+
+                    const finalHTML = "<!DOCTYPE html>\n" + cloneDoc.documentElement.outerHTML;
+                    const blob = new Blob([finalHTML], { type: 'text/html' });
+                    const url = URL.createObjectURL(blob);
+                    
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'podcast_player.html';
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    
+                    showModal("✅ 匯出成功！", "您的專屬廣播劇已打包為 HTML 網頁。\n您可以直接雙擊打開，且播放時角色依舊可以被自由拖曳與縮放喔！");
+
+                } catch (err) {
+                    console.error("匯出失敗", err);
+                    showModal("❌ 匯出失敗", "封裝檔案時發生錯誤，請確認您的檔案格式。");
+                } finally {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }
+            });
+        }
+
+        // ==========================================
+        // 播放控制引擎與舞台特效
+        // ==========================================
+        const stage = document.getElementById('stage');
+        const avatarsContainer = document.getElementById('avatars-container');
+        const subtitleDiv = document.getElementById('subtitle');
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        async function generateAIBackground(promptText) {
+            if (!apiKey) return false;
+            subtitleDiv.className = "text-xl text-yellow-300";
+            subtitleDiv.textContent = "🎨 AI 正在建構場景...";
+            subtitleDiv.style.opacity = 1;
+            
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ instances: { prompt: `Podcast background: "${promptText.substring(0, 100)}". No text.` }, parameters: { sampleCount: 1 } })
+                });
+                const result = await response.json();
+                if (result.predictions && result.predictions[0]) {
+                    const imgUrl = `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
+                    stage.style.backgroundImage = `url(${imgUrl})`;
+                    stage.style.backgroundColor = "rgba(17, 24, 39, 0.6)"; 
+                    return imgUrl; 
+                }
+            } catch(e) { console.error("AI 失敗"); }
+            return false;
+        }
+
+        function initStageAvatars() {
+            if (!avatarsContainer) return;
+            avatarsContainer.innerHTML = ''; 
+            const totalRoles = rolesList.length;
+
+            rolesList.forEach((roleData, idx) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'character-avatar-wrapper flex flex-col items-center justify-end transition-opacity duration-300 opacity-60 absolute bottom-0 cursor-grab active:cursor-grabbing';
+                wrapper.dataset.speaker = roleData.name;
+
+                const spacing = 100 / (totalRoles + 1);
+                wrapper.style.left = `${spacing * (idx + 1)}%`;
+                
+                wrapper.dataset.x = "0";
+                wrapper.dataset.y = "0";
+                wrapper.dataset.scale = "1";
+                
+                applyAvatarTransform(wrapper, false);
+
+                const content = document.createElement('div');
+                content.className = 'avatar-content flex items-end justify-center w-24 h-32 md:w-32 md:h-48 mb-2 transition-transform duration-200';
+
+                if (roleData.image) {
+                    content.innerHTML = `<img src="${roleData.image}" draggable="false" class="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.4)] pointer-events-none">`;
+                } else {
+                    content.innerHTML = `<span class="text-6xl md:text-7xl drop-shadow-lg pb-4 pointer-events-none">🙂</span>`;
+                }
+
+                const nameLabel = document.createElement('div');
+                nameLabel.className = 'bg-black/80 px-3 py-1 rounded-full text-xs text-white font-bold tracking-wide border border-gray-600 shadow-md flex-shrink-0 pointer-events-none mt-2';
+                nameLabel.textContent = roleData.name;
+
+                wrapper.appendChild(content);
+                wrapper.appendChild(nameLabel);
+                
+                let isDragging = false;
+                let startX, startY, initialX, initialY;
+
+                wrapper.addEventListener('mousedown', (e) => {
+                    isDragging = true;
+                    wrapper.style.zIndex = '50';
+                    startX = e.clientX;
+                    startY = e.clientY;
+                    initialX = parseFloat(wrapper.dataset.x) || 0;
+                    initialY = parseFloat(wrapper.dataset.y) || 0;
+                });
+
+                window.addEventListener('mousemove', (e) => {
+                    if (!isDragging) return;
+                    const dx = e.clientX - startX;
+                    const dy = e.clientY - startY;
+                    wrapper.dataset.x = initialX + dx;
+                    wrapper.dataset.y = initialY + dy;
+                    applyAvatarTransform(wrapper, wrapper.querySelector('.avatar-content').classList.contains('is-talking'));
+                });
+
+                window.addEventListener('mouseup', () => {
+                    if (isDragging) {
+                        isDragging = false;
+                        wrapper.style.zIndex = wrapper.querySelector('.avatar-content').classList.contains('is-talking') ? '20' : '10';
+                    }
+                });
+
+                wrapper.addEventListener('wheel', (e) => {
+                    e.preventDefault(); 
+                    let scale = parseFloat(wrapper.dataset.scale) || 1;
+                    scale += e.deltaY * -0.001;
+                    scale = Math.min(Math.max(0.3, scale), 3);
+                    wrapper.dataset.scale = scale;
+                    applyAvatarTransform(wrapper, wrapper.querySelector('.avatar-content').classList.contains('is-talking'));
+                });
+
+                avatarsContainer.appendChild(wrapper);
+            });
+        }
+
+        function applyAvatarTransform(wrapper, isTalking) {
+            const x = parseFloat(wrapper.dataset.x) || 0;
+            const y = parseFloat(wrapper.dataset.y) || 0;
+            const userScale = parseFloat(wrapper.dataset.scale) || 1;
+            
+            const baseScale = isTalking ? 1.05 : 0.9; 
+            const finalScale = baseScale * userScale;
+
+            wrapper.style.transform = `translate(calc(-50% + ${x}px), ${y}px) scale(${finalScale})`;
+        }
+
+        function updateStageAvatarAndSubtitle(sentenceObj) {
+            const emoData = EMOTIONS[sentenceObj.emotion];
+            if (subtitleDiv) {
+                subtitleDiv.className = emoData.class + " font-black drop-shadow-[0_4px_4px_rgba(0,0,0,1)] transition-all duration-200";
+                subtitleDiv.textContent = sentenceObj.text;
+                subtitleDiv.style.opacity = 1;
+            }
+
+            document.querySelectorAll('.character-avatar-wrapper').forEach(el => {
+                el.classList.add('opacity-60');
+                el.classList.remove('opacity-100');
+                el.style.zIndex = '10';
+                el.querySelector('.avatar-content').classList.remove('is-talking');
+                applyAvatarTransform(el, false);
+            });
+
+            const speakers = sentenceObj.speaker.split('&').map(s => s.trim());
+            speakers.forEach(speakerName => {
+                const speakingAvatar = document.querySelector(`.character-avatar-wrapper[data-speaker="${speakerName}"]`);
+                if (speakingAvatar) {
+                    speakingAvatar.classList.remove('opacity-60');
+                    speakingAvatar.classList.add('opacity-100');
+                    speakingAvatar.style.zIndex = '20';
+                    speakingAvatar.querySelector('.avatar-content').classList.add('is-talking');
+                    applyAvatarTransform(speakingAvatar, true); 
+
+                    const roleData = rolesList.find(r => r.name === speakerName);
+                    if (!roleData || !roleData.image) {
+                        const contentDiv = speakingAvatar.querySelector('.avatar-content');
+                        if (contentDiv) contentDiv.innerHTML = `<span class="text-6xl md:text-7xl drop-shadow-lg pb-4 pointer-events-none">${emoData.emoji}</span>`;
+                    }
+                }
+            });
+        }
+
+        async function runPlaySequence() {
+            synth.cancel();
+            isPlaying = true;
+            const playHint = document.getElementById('play-hint');
+            if (playHint) playHint.style.display = 'none';
+            
+            if (audioCtx.state === 'suspended') await audioCtx.resume();
+
+            initStageAvatars();
+
+            while (bgmPlayers.length < sectionsData.length) {
+                const p = new Audio(); p.loop = true; bgmPlayers.push(p);
+            }
+
+            for (let i = 0; i < sectionsData.length; i++) {
+                if (!isPlaying) break; 
+                
+                const currentBgm = bgmPlayers[i];
+                const sec = sectionsData[i];
+                
+                if (sec.bgImgUrl && sec.bgImgUrl.trim() !== "") {
+                    stage.style.backgroundImage = `url('${sec.bgImgUrl.trim()}')`;
+                    stage.style.backgroundColor = "rgba(17, 24, 39, 0.6)";
+                } else if (!window.__IS_EXPORTED_PLAYER && sec.storyboard.length > 0) {
+                    const sceneDesc = sec.storyboard.map(s => s.text).join(' ');
+                    const aiImageUrl = await generateAIBackground(sceneDesc);
+                    if (aiImageUrl) sec.bgImgUrl = aiImageUrl; 
+                }
+
+                if (sec.bgmUrl) {
+                    currentBgm.src = sec.bgmUrl;
+                    currentBgm.volume = 0.5; 
+                    currentBgm.play().catch(e => console.log('BGM Error:', e));
+                    
+                    if (i === 0 && subtitleDiv) {
+                        subtitleDiv.className = "text-2xl text-white italic drop-shadow-md";
+                        subtitleDiv.textContent = "🎵 (片頭音樂播放中...)";
+                        await delayAsync(6000); 
+                    }
+                    if (isPlaying) await fadeAudio(currentBgm, currentBgm.volume, 0.1, 1000);
+                }
+
+                if (sec.voiceUrl) {
+                    await playCustomVoiceAsync(sec);
+                } else {
+                    for (let sentence of sec.storyboard) {
+                        if (!isPlaying) break;
+                        await speakSentenceAsync(sentence);
+                        await delayAsync(300); 
+                    }
+                }
+
+                if (!isPlaying) break;
+
+                if (sec.bgmUrl) {
+                    document.querySelectorAll('.character-avatar-wrapper').forEach(el => {
+                        el.classList.add('opacity-60');
+                        el.classList.remove('opacity-100');
+                        el.querySelector('.avatar-content').classList.remove('is-talking');
+                        applyAvatarTransform(el, false);
+                    });
+                    
+                    if (i === sectionsData.length - 1) {
+                        if (subtitleDiv) {
+                            subtitleDiv.textContent = "🎵 (片尾音樂播放中...)";
+                            subtitleDiv.className = "text-2xl text-blue-300 italic drop-shadow-md";
+                        }
+                        await fadeAudio(currentBgm, currentBgm.volume, 0.8, 2000); 
+                        await delayAsync(8000); 
+                        if (!isPlaying) break; 
+                        if (subtitleDiv) subtitleDiv.textContent = "🎵 (音樂漸弱至結束...)";
+                        await fadeAudio(currentBgm, currentBgm.volume, 0, 3000); 
+                    } else {
+                        if (subtitleDiv) {
+                            subtitleDiv.textContent = "🎵 (音樂漸強)";
+                            subtitleDiv.className = "text-xl text-gray-300 italic drop-shadow-md";
+                        }
+                        await fadeAudio(currentBgm, currentBgm.volume, 0.5, 2000);
+                        await delayAsync(2000); 
+                        await fadeAudio(currentBgm, currentBgm.volume, 0, 1500);
+                    }
+                }
+
+                if (i < sectionsData.length - 1 && isPlaying) {
+                    await playOceanTransitionAsync();
+                }
+            }
+
+            isPlaying = false;
+            resetStage();
+        }
+
+        const btnPlay = document.getElementById('btn-play');
+        if (btnPlay) {
+            btnPlay.addEventListener('click', async () => {
+                if (isPlaying) return;
+                await runPlaySequence();
+            });
+        }
+
+        const btnStop = document.getElementById('btn-stop');
+        if (btnStop) {
+            btnStop.addEventListener('click', () => {
+                isPlaying = false;
+                synth.cancel();
+                bgmPlayers.forEach(p => { p.pause(); p.volume = 0; });
+                if (currentCustomAudio) { currentCustomAudio.pause(); currentCustomAudio = null; }
+                resetStage();
+            });
+        }
+
+        // ==========================================
+        // 核心語音載入與頁面初始化
+        // ==========================================
+        function populateVoiceList() {
+            voices = synth.getVoices();
+            if (document.getElementById('role-management-area')) {
+                renderRolesManager(); 
+            }
+        }
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = populateVoiceList;
+        }
+
+        window.onload = () => {
+            if (window.__IS_EXPORTED_PLAYER) {
+                // 匯出播放器模式
+                rolesList = window.__EXPORTED_ROLES;
+                sectionsData = window.__EXPORTED_SECTIONS;
+                
+                const playArea = document.getElementById('play-area');
+                if (playArea) {
+                    playArea.classList.remove('hidden');
+                    playArea.classList.add('flex');
+                }
+                
+                initStageAvatars();
+                populateVoiceList(); 
+            } else {
+                // 一般編輯器模式
+                addSection("小瑞：當海上的風機一座座轉動，為人類帶來綠色能源時，有沒有一雙眼睛在海浪下默默注視著我們？那是一隻中華白海豚——牠，能繼續在這片海裡自由游動嗎？\n小祥：「海洋的聲音，用心來聆聽」，大家好，歡迎來到《聲入海心》，我們是今天的海洋特派員。\n小瑞：我是小瑞。\n小祥：我是小祥。\n小瑞&小祥：讓我們透過短短的五分鐘，關心你我身邊的海洋議題，今天要探討的主題是——「白海豚轉不轉彎？離岸風電對中華白海豚的影響」。", GITHUB_BASE_URL + "01-圖片/01-北部基隆協和電廠可用圖片/07-台灣東北角海岸.jpg");
+                addSection("小瑞：首先，我們來看看離岸風電為什麼會影響白海豚？\n小祥：主要的問題在於施工時的「打樁噪音」。風機在安裝時需要將巨大的基樁打入海床，這會產生極大的水下聲波。\n小瑞：沒錯，白海豚是靠回聲定位來覓食、溝通和避開危險的，強烈的噪音不僅會干擾牠們的生活，嚴重的話甚至可能造成永久性的聽力損傷。\n小祥：所以如何在推動綠能的同時，做好降噪措施，像是使用氣泡帷幕等技術，就成了非常關鍵的保育課題。", GITHUB_BASE_URL + "01-圖片/01-北部基隆協和電廠可用圖片/01-電廠遠景.jpg");
+                addSection("小瑞：今天我們透過離岸風電與白海豚的故事，看到的不只是能源開發與生態保育的衝突，更是人類在追求進步時，該如何與自然共處的課題。\n小祥：對啊，每一次的政策與建設，都不只是數字與工程，更牽動著海裡每一條生命的去向。\n小瑞：我們或許無法讓每一個選擇都完美，但至少能讓每一次決定更有意識。\n小祥：希望每一度綠能電力的背後，都不是犧牲，而是共榮，讓人類與海洋一起呼吸。\n小瑞：也希望今天的節目，能讓大家在看新聞時，多想一點、千萬要記得關心——不只關心風從哪裡來，也關心海豚能不能回家。\n小祥：感謝收聽《聲入海心》，我們下次再會！\n小瑞：掰掰！", GITHUB_BASE_URL + "01-圖片/01-北部基隆協和電廠可用圖片/05-北部扇珊瑚.jpg");
+                populateVoiceList();
+            }
+        };
+
+        // ==========================================
+        // 輔助函式庫 (Delay, TTS, Fade)
+        // ==========================================
+        function delayAsync(ms) {
+            return new Promise(resolve => {
+                let timer = setTimeout(() => {
+                    if(!isPlaying) { clearTimeout(timer); resolve(); }
+                    else { resolve(); }
+                }, ms);
+            });
+        }
+
+        function playCustomVoiceAsync(sec) {
+            return new Promise((resolve) => {
+                const audio = new Audio(sec.voiceUrl);
+                currentCustomAudio = audio; 
+                
+                audio.onloadedmetadata = () => {
+                    const rateInput = document.getElementById('rate-slider');
+                    audio.playbackRate = rateInput ? parseFloat(rateInput.value) : 1.0;
+
+                    audio.play().catch(e => { console.error("自訂音檔失敗", e); resolve(); });
+                    const durationMs = audio.duration * 1000;
+                    const sentences = sec.storyboard;
+                    if (sentences.length === 0) { audio.onended = resolve; return; }
+
+                    const timePerSentence = durationMs / sentences.length;
+                    let currentIdx = 0;
+                    
+                    const updateSubtitle = () => {
+                        if (!isPlaying) { audio.pause(); resolve(); return; }
+                        if (currentIdx < sentences.length) {
+                            updateStageAvatarAndSubtitle(sentences[currentIdx]);
+                            currentIdx++;
+                            setTimeout(updateSubtitle, timePerSentence / audio.playbackRate);
+                        }
+                    };
+                    updateSubtitle();
+                    audio.onended = () => { 
+                        currentCustomAudio = null; 
+                        document.querySelectorAll('.character-avatar-wrapper').forEach(el => {
+                            el.querySelector('.avatar-content').classList.remove('is-talking');
+                            applyAvatarTransform(el, false);
+                        });
+                        resolve(); 
+                    };
+                };
+                audio.onerror = () => { currentCustomAudio = null; resolve(); };
+            });
+        }
+
+        function speakSentenceAsync(sentenceObj) {
+            return new Promise((resolve) => {
+                const utterance = new SpeechSynthesisUtterance(sentenceObj.text);
+                window.__currentUtterance = utterance; 
+
+                const firstSpeaker = sentenceObj.speaker.split('&')[0].trim();
+                const roleData = rolesList.find(r => r.name === firstSpeaker);
+                if (roleData && voices.length > 0) {
+                    utterance.voice = voices.find(v => v.name === roleData.voiceName) || voices[0];
+                }
+                
+                const rateInput = document.getElementById('rate-slider');
+                utterance.rate = rateInput ? parseFloat(rateInput.value) : 1.0;
+
+                updateStageAvatarAndSubtitle(sentenceObj);
+
+                utterance.onend = () => { 
+                    document.querySelectorAll('.character-avatar-wrapper').forEach(el => {
+                        el.querySelector('.avatar-content').classList.remove('is-talking');
+                        applyAvatarTransform(el, false);
+                    });
+                    resolve(); 
+                };
+                utterance.onerror = () => resolve();
+                synth.speak(utterance);
+            });
+        }
+
+        function resetStage() {
+            document.querySelectorAll('.character-avatar-wrapper').forEach(el => {
+                el.classList.add('opacity-60');
+                el.classList.remove('opacity-100');
+                el.style.zIndex = '10';
+                el.querySelector('.avatar-content').classList.remove('is-talking');
+                applyAvatarTransform(el, false);
+                
+                const roleData = rolesList.find(r => r.name === el.dataset.speaker);
+                if (roleData && !roleData.image) {
+                    el.querySelector('.avatar-content').innerHTML = `<span class="text-6xl md:text-7xl drop-shadow-lg pb-4 pointer-events-none">🙂</span>`;
+                }
+            });
+            if(subtitleDiv) subtitleDiv.style.opacity = 0;
+            if(stage) {
+                stage.style.backgroundImage = 'none';
+                stage.style.backgroundColor = '#1f2937';
+            }
+            const playHint = document.getElementById('play-hint');
+            if(playHint) playHint.style.display = 'block';
+        }
+
+        function fadeAudio(audioObj, startVol, targetVol, durationMs) {
+            return new Promise(resolve => {
+                if (audioObj.paused && targetVol > 0) audioObj.play();
+                const steps = 20;
+                const stepTime = durationMs / steps;
+                const volumeStep = (targetVol - startVol) / steps;
+                let currentStep = 0;
+                
+                const fade = setInterval(() => {
+                    if (!isPlaying) { clearInterval(fade); audioObj.pause(); resolve(); return; }
+                    currentStep++;
+                    let newVol = startVol + (volumeStep * currentStep);
+                    if (newVol < 0) newVol = 0;
+                    if (newVol > 1) newVol = 1;
+                    audioObj.volume = newVol;
+                    
+                    if (currentStep >= steps) {
+                        clearInterval(fade);
+                        if (targetVol === 0) audioObj.pause();
+                        resolve();
+                    }
+                }, stepTime);
+            });
+        }
+
+        async function playOceanTransitionAsync() {
+            if(subtitleDiv) {
+                subtitleDiv.className = "text-2xl text-blue-300 italic drop-shadow-md";
+                subtitleDiv.textContent = "🌊 (海浪舒緩轉場中...)";
+            }
+            
+            document.querySelectorAll('.character-avatar-wrapper').forEach(el => {
+                const roleData = rolesList.find(r => r.name === el.dataset.speaker);
+                if (roleData && !roleData.image) {
+                    el.querySelector('.avatar-content').innerHTML = `<span class="text-6xl md:text-7xl drop-shadow-lg pb-4 pointer-events-none">😌</span>`;
+                }
+            });
+            
+            return new Promise((resolve) => {
+                let timer = setTimeout(resolve, 6000); 
+                const now = audioCtx.currentTime;
+                const bufferSize = audioCtx.sampleRate * 5; 
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1; 
+                
+                const noiseSource = audioCtx.createBufferSource();
+                noiseSource.buffer = buffer;
+
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(100, now);
+                filter.frequency.linearRampToValueAtTime(800, now + 2.5); 
+                filter.frequency.linearRampToValueAtTime(100, now + 5);   
+
+                const gain = audioCtx.createGain();
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.8, now + 2.5);
+                gain.gain.linearRampToValueAtTime(0, now + 5);
+                
+                noiseSource.connect(filter);
+                filter.connect(gain);
+                gain.connect(audioCtx.destination);
+                noiseSource.start(now);
+
+                setTimeout(() => { clearTimeout(timer); resolve(); }, 5500);
+            });
+        }
+
+    </script>
+</body>
+</html>
