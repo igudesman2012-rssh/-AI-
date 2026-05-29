@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>白海豚的生路：逃離離岸風電噪音 3D</title>
+    <!-- 引入 Tailwind CSS 確保 UI 排版現代且美觀 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Google Fonts 提升中文字型質感 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Noto Sans TC', sans-serif;
+            user-select: none;
+        }
+        /* 讓 3D 畫布填滿螢幕 */
+        #game-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        /* UI 疊加層樣式 */
+        .ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(7, 16, 39, 0.85);
+            backdrop-filter: blur(8px);
+            transition: all 0.5s ease;
+        }
+    </style>
+
+    <!-- Importmap 設定：穩定引入最新版 Three.js 核心與 OrbitControls -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-950 text-white">
+
+    <!-- 3D 渲染畫布 -->
+    <canvas id="game-canvas"></canvas>
+
+    <!-- 遊戲頂部狀態欄 (運行時顯示) -->
+    <div id="status-bar" class="absolute top-4 left-4 z-20 bg-slate-900/80 backdrop-blur-md px-6 py-3 rounded-full border border-blue-500/30 flex items-center gap-6 text-sm font-bold pointer-events-none hidden">
+        <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-cyan-400 animate-pulse"></span>
+            <span>目標：尋找綠色安全新家園</span>
+        </div>
+        <div class="h-4 w-[1px] bg-slate-700"></div>
+        <div>
+            <span>距離新家園：</span>
+            <span id="distance-txt" class="text-green-400 text-lg">---</span> 米
+        </div>
+    </div>
+
+    <!-- 遊戲操作提示 (左下角) -->
+    <div id="control-hints" class="absolute bottom-4 left-4 z-20 bg-slate-900/80 backdrop-blur-md px-4 py-3 rounded-lg border border-slate-700 text-xs text-slate-300 pointer-events-none hidden">
+        <p class="font-bold mb-1 text-cyan-400">控制說明：</p>
+        <p>• 前進/後退：<kbd class="px-1.5 py-0.5 bg-slate-800 rounded">W</kbd> / <kbd class="px-1.5 py-0.5 bg-slate-800 rounded">S</kbd> 或方向鍵 <kbd class="px-1.5 py-0.5 bg-slate-800 rounded">↑</kbd> <kbd class="px-1.5 py-0.5 bg-slate-800 rounded">↓</kbd></p>
+        <p class="mt-1">• 左右旋轉：<kbd class="px-1.5 py-0.5 bg-slate-800 rounded">A</kbd> / <kbd class="px-1.5 py-0.5 bg-slate-800 rounded">D</kbd> 或方向鍵 <kbd class="px-1.5 py-0.5 bg-slate-800 rounded">←</kbd> <kbd class="px-1.5 py-0.5 bg-slate-800 rounded">→</kbd></p>
+    </div>
+
+    <!-- 1. 開始畫面 UI -->
+    <div id="start-screen" class="ui-overlay">
+        <div class="max-w-xl text-center px-6">
+            <div class="inline-block px-3 py-1 bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 rounded-full text-xs font-bold tracking-wider mb-4 animate-pulse">
+                環境保護與生態教育模擬遊戲
+            </div>
+            <h1 class="text-4xl md:text-5xl font-extrabold mb-6 tracking-wide leading-tight bg-gradient-to-r from-cyan-400 via-sky-300 to-emerald-400 bg-clip-text text-transparent">
+                白海豚的生路<br><span class="text-2xl md:text-3xl font-bold text-white">逃離離岸風電噪音</span>
+            </h1>
+            <p class="text-slate-300 text-sm md:text-base mb-8 leading-relaxed">
+                台灣海峽的「中華白海豚」正面臨嚴重的生存危機。離岸風電施工時的<strong class="text-red-400 font-bold">「海底打樁噪音」</strong>強度極高，會破壞其聽覺定位系統，導致白海豚迷失甚至死亡。
+                請幫助這隻迷途的白海豚，避開巨大的<span class="text-red-400 font-bold">打樁機噪音紅色警戒區</span>與<span class="text-amber-200 font-bold">白化珊瑚礁</span>，成功游向乾淨的<span class="text-emerald-400 font-bold">綠色安全新家園</span>！
+            </p>
+            <button id="start-btn" class="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-extrabold text-lg rounded-full shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 hover:scale-105 transition-all duration-300">
+                開始拯救行動
+            </button>
+        </div>
+    </div>
+
+    <!-- 2. 遊戲結束畫面 UI (獲勝/失敗共用) -->
+    <div id="game-over-screen" class="ui-overlay hidden">
+        <div class="max-w-md text-center px-6">
+            <!-- 狀態圖示容器 -->
+            <div id="result-icon-container" class="w-24 h-24 mx-auto mb-6 flex items-center justify-center rounded-full">
+                <!-- 動態注入 SVG 圖示 -->
+            </div>
+            
+            <h2 id="result-title" class="text-3xl font-extrabold mb-4">
+                <!-- 動態寫入勝負標題 -->
+            </h2>
+            
+            <p id="result-desc" class="text-slate-300 text-sm md:text-base mb-8 leading-relaxed">
+                <!-- 動態寫入科普解說 -->
+            </p>
+
+            <button id="restart-btn" class="px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-extrabold text-lg rounded-full shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 hover:scale-105 transition-all duration-300">
+                再次挑戰
+            </button>
+        </div>
+    </div>
+
+    <!-- 3D 遊戲核心邏輯 -->
+    <script type="module">
+        import * as THREE from 'three';
+
+        // ==========================================
+        // 1. 全域變數定義與遊戲設定
+        // ==========================================
+        let scene, camera, renderer;
+        let dolphin; // 玩家 (白海豚)
+        let safeZone; // 安全新家園
+        let clock; // 記錄時間
+        
+        // 陣列儲存需要進行碰撞偵測的物件
+        const obstacles = [];  // 白化珊瑚礁
+        const pileDrivers = []; // 灰色打樁機主體
+        const noiseSpheres = []; // 紅色噪音半透明範圍
+
+        // 遊戲狀態控制
+        let isGameActive = false;
+        
+        // 鍵盤輸入狀態狀態，支援大小寫 W, A, S, D 與方向鍵
+        const keys = { 
+            w: false, a: false, s: false, d: false, 
+            ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false 
+        };
+
+        // 物理與運動常數設定
+        const DOLPHIN_SPEED = 25;       // 白海豚前進速度
+        const DOLPHIN_ROT_SPEED = 3.0;   // 白海豚轉向速度 (弧度/秒)
+        const MAP_SIZE = 400;           // 遊戲地圖大小 (正方形邊長)
+
+        // 粒子系統 (模擬深海氣泡)
+        let bubbleParticles;
+        const BUBBLE_COUNT = 150;
+
+        // ==========================================
+        // 2. 啟動與初始化
+        // ==========================================
+        window.addEventListener('load', () => {
+            initEngine();       // 初始化 Three.js 引擎、燈光與海洋環境
+            createEnvironment(); // 建立海底沙地與氣泡粒子
+            createGameEntities(); // 建立白海豚、障礙物、打樁機與安全區
+            setupInput();        // 鍵盤輸入監聽
+            setupUIEvents();     // 按鈕事件綁定
+            
+            // 啟動動畫循環
+            clock = new THREE.Clock();
+            animate();
+        });
+
+        // ==========================================
+        // 3. 引擎與環境建置
+        // ==========================================
+        function initEngine() {
+            const canvas = document.getElementById('game-canvas');
+            
+            // 建立 3D 場景
+            scene = new THREE.Scene();
+            
+            // 設定深藍色海洋霧氣 (營視深海感)
+            scene.background = new THREE.Color(0x061129);
+            scene.fog = new THREE.FogExp2(0x061129, 0.012);
+
+            // 建立攝影機：第三人稱視角 (視角 60 度，符合人類視野)
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+            // 建立渲染器
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true; // 開啟陰影，增加立體視覺反饋
+
+            // 設置環境光源 (提供基礎藍色海底環境光)
+            const ambientLight = new THREE.AmbientLight(0x0a2240, 1.5);
+            scene.add(ambientLight);
+
+            // 設置平行光源 (模擬上方射入的海面陽光)
+            const dirLight = new THREE.DirectionalLight(0xd9f2ff, 1.5);
+            dirLight.position.set(50, 150, 50);
+            dirLight.castShadow = true;
+            // 優化陰影貼圖細節
+            dirLight.shadow.mapSize.width = 2048;
+            dirLight.shadow.mapSize.height = 2048;
+            dirLight.shadow.camera.near = 0.5;
+            dirLight.shadow.camera.far = 300;
+            const d = 150;
+            dirLight.shadow.camera.left = -d;
+            dirLight.shadow.camera.right = d;
+            dirLight.shadow.camera.top = d;
+            dirLight.shadow.camera.bottom = -d;
+            scene.add(dirLight);
+
+            // 視窗大小自適應
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        // 當瀏覽器視窗大小改變時重算比例
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // 建立海底與微粒子
+        function createEnvironment() {
+            // A. 海底沙地
+            const floorGeo = new THREE.PlaneGeometry(MAP_SIZE * 1.5, MAP_SIZE * 1.5, 32, 32);
+            
+            // 讓沙地表面稍微起伏不平 (擾動頂點 z 軸)
+            const posAttr = floorGeo.attributes.position;
+            for (let i = 0; i < posAttr.count; i++) {
+                const x = posAttr.getX(i);
+                const y = posAttr.getY(i);
+                // 使用簡易正弦波模擬沙丘
+                const z = Math.sin(x * 0.05) * 1.5 + Math.cos(y * 0.05) * 1.5;
+                posAttr.setZ(i, z);
+            }
+            floorGeo.computeVertexNormals();
+
+            const floorMat = new THREE.MeshStandardMaterial({
+                color: 0x11274c,      // 暗沙藍色
+                roughness: 0.9,       // 粗糙表面
+                metalness: 0.1
+            });
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.rotation.x = -Math.PI / 2; // 水平躺置
+            floor.position.y = -1; // 稍微低於零點
+            floor.receiveShadow = true;
+            scene.add(floor);
+
+            // B. 深海飄浮氣泡粒子系統
+            const bubbleGeo = new THREE.BufferGeometry();
+            const bubblePositions = new Float32Array(BUBBLE_COUNT * 3);
+            const bubbleSpeeds = [];
+
+            for (let i = 0; i < BUBBLE_COUNT; i++) {
+                // 在地圖範圍內隨機分布粒子
+                bubblePositions[i * 3] = (Math.random() - 0.5) * MAP_SIZE;
+                bubblePositions[i * 3 + 1] = Math.random() * 40; // 高度 0 ~ 40 之間
+                bubblePositions[i * 3 + 2] = (Math.random() - 0.5) * MAP_SIZE;
+                
+                bubbleSpeeds.push({
+                    y: 1.5 + Math.random() * 2,          // 上升速度
+                    xShift: (Math.random() - 0.5) * 0.5, // 左右擺動幅度
+                    freq: 0.5 + Math.random() * 1.5       // 擺動頻率
+                });
+            }
+
+            bubbleGeo.setAttribute('position', new THREE.BufferAttribute(bubblePositions, 3));
+            
+            // 建立簡易白點作為氣泡
+            const bubbleMat = new THREE.PointsMaterial({
+                color: 0x90e0ef,
+                size: 0.8,
+                transparent: true,
+                opacity: 0.6,
+                blending: THREE.AdditiveBlending
+            });
+
+            bubbleParticles = new THREE.Points(bubbleGeo, bubbleMat);
+            bubbleParticles.userData = { speeds: bubbleSpeeds }; // 存入自定義速度數據供動畫更新
+            scene.add(bubbleParticles);
+        }
+
+        // ==========================================
+        // 4. 建立遊戲實體物件 (重點擴充區)
+        // ==========================================
+        function createGameEntities() {
+
+            /* -----------------------------------------
+               【未來替換外部 3D 模型 (.gltf / .glb) 的方法說明】
+               
+               1. 引入 GLTFLoader 模組：
+                  在上面的 import 區塊，或是 script 頂端加入：
+                  import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+                  
+               2. 初始化加載器：
+                  const loader = new GLTFLoader();
+                  
+               3. 載入模型 (以白海豚為例)：
+                  loader.load('models/dolphin.gltf', (gltf) => {
+                      const dolphinModel = gltf.scene;
+                      
+                      // 設定陰影
+                      dolphinModel.traverse((node) => {
+                          if (node.isMesh) {
+                              node.castShadow = true;
+                              node.receiveShadow = true;
+                          }
+                      });
+                      
+                      // 縮放與旋轉微調至適合的大小與方向
+                      dolphinModel.scale.set(1.5, 1.5, 1.5);
+                      
+                      // 替換現有的幾何體：
+                      // 先將原本 of dolphinMesh 移除： dolphin.remove(dolphinMesh);
+                      // 再將新模型加入： dolphin.add(dolphinModel);
+                  }, undefined, (error) => {
+                      console.error('模型載入失敗：', error);
+                  });
+               ----------------------------------------- */
+
+            // ------------------------------------------
+            // A. 白海豚玩家 (Dolphin Group)
+            // ------------------------------------------
+            dolphin = new THREE.Group();
+            dolphin.position.set(0, 5, 150); // 初始生成在南端
+            scene.add(dolphin);
+
+            // 這裡使用 CapsuleGeometry 來代表白海豚
+            const bodyGeo = new THREE.CapsuleGeometry(1.2, 4.0, 8, 16);
+            // 旋轉膠囊體使其水平，像海豚的流線身體
+            bodyGeo.rotateX(Math.PI / 2);
+
+            const bodyMat = new THREE.MeshStandardMaterial({
+                color: 0xf0f5fa,      // 白海豚略帶粉白色的質感
+                roughness: 0.2,       // 皮膚光滑
+                metalness: 0.1,
+                bumpScale: 0.05
+            });
+
+            const dolphinMesh = new THREE.Mesh(bodyGeo, bodyMat);
+            dolphinMesh.name = "geometry_mesh"; // 命名方便未來替換邏輯識別
+            dolphinMesh.castShadow = true;
+            dolphinMesh.receiveShadow = true;
+            dolphin.add(dolphinMesh);
+
+            // 為幾何圖形海豚添加簡單的背鰭，方便識別正反面與朝向
+            const finGeo = new THREE.ConeGeometry(0.6, 1.8, 4);
+            finGeo.rotateX(Math.PI / 4); // 稍微往後傾斜
+            const finMesh = new THREE.Mesh(finGeo, bodyMat);
+            finMesh.position.set(0, 1.2, -0.5);
+            dolphin.add(finMesh);
+
+
+            // ------------------------------------------
+            // B. 危險區：海底打樁機 (Pile Driver & Noise)
+            // ------------------------------------------
+            // 散佈 4 個高噪音打樁點在玩家前進的中途路上
+            const pilePositions = [
+                { x: -45, z: 80 },
+                { x: 35,  z: 30 },
+                { x: -50, z: -30 },
+                { x: 40,  z: -80 }
+            ];
+
+            const pileDriverGeo = new THREE.CylinderGeometry(2, 2, 60, 16);
+            const pileDriverMat = new THREE.MeshStandardMaterial({
+                color: 0x555c66,       // 鋼鐵灰色
+                metalness: 0.8,        // 高金屬感
+                roughness: 0.3
+            });
+
+            // 噪音範圍：紅色半透明發光球體
+            const noiseRadius = 38; // 噪音波及半徑
+            const noiseGeo = new THREE.SphereGeometry(noiseRadius, 32, 16);
+            const noiseMat = new THREE.MeshBasicMaterial({
+                color: 0xff3333,
+                transparent: true,
+                opacity: 0.13,         // 半透明，若隱若現的噪音邊界
+                wireframe: true        // 網格線展現出聲波傳遞的效果
+            });
+
+            pilePositions.forEach((pos, index) => {
+                const pileGroup = new THREE.Group();
+                pileGroup.position.set(pos.x, 25, pos.z); // 打樁機高高聳立
+
+                // 1. 打樁機主體 (Cylinder)
+                const mainPost = new THREE.Mesh(pileDriverGeo, pileDriverMat);
+                mainPost.castShadow = true;
+                mainPost.receiveShadow = true;
+                pileGroup.add(mainPost);
+
+                // 2. 噪音危害區域 (Sphere)
+                const noiseField = new THREE.Mesh(noiseGeo, noiseMat);
+                noiseField.name = `noise_${index}`;
+                pileGroup.add(noiseField);
+
+                scene.add(pileGroup);
+
+                // 將物件存入全域陣列，以便後續進行動畫與碰撞計算
+                pileDrivers.push(pileGroup);
+                noiseSpheres.push({
+                    mesh: noiseField,
+                    worldPos: new THREE.Vector3(pos.x, 5, pos.z), // 實際碰撞中心(約白海豚游動高度)
+                    radius: noiseRadius
+                });
+            });
+
+
+            // ------------------------------------------
+            // C. 障礙物：白化珊瑚礁 (Bleached Corals)
+            // ------------------------------------------
+            // 隨機在海底鋪設一些白化珊瑚，代表受全球暖化破壞的海洋環境
+            const coralCount = 35;
+            const coralColors = [0xeeeeee, 0xdddddd, 0xcccccc]; // 失去生機的死白與灰白
+
+            for (let i = 0; i < coralCount; i++) {
+                // 隨機錐體來模擬珊瑚礁叢
+                const height = 4 + Math.random() * 8;
+                const radius = 2 + Math.random() * 3;
+                const coralGeo = new THREE.ConeGeometry(radius, height, 5);
+                
+                const randomColor = coralColors[Math.floor(Math.random() * coralColors.length)];
+                const coralMat = new THREE.MeshStandardMaterial({
+                    color: randomColor,
+                    roughness: 0.9,
+                    flatShading: true // 稜角分明，展現枯骨感
+                });
+
+                const coral = new THREE.Mesh(coralGeo, coralMat);
+                
+                // 隨機擺放在地圖，但避開玩家起點 (Z > 120) 與終點 (Z < -120)
+                let x = (Math.random() - 0.5) * (MAP_SIZE * 0.4);
+                let z = (Math.random() - 0.5) * (MAP_SIZE * 0.6);
+                
+                // 限制在路徑中間
+                if (Math.abs(z) > 110) {
+                    z = (Math.random() - 0.5) * 100;
+                }
+
+                coral.position.set(x, height / 2 - 1, z);
+                coral.castShadow = true;
+                coral.receiveShadow = true;
+                
+                scene.add(coral);
+
+                // 紀錄障礙物包圍球半徑 (用於 AABB/球體碰撞偵測)
+                obstacles.push({
+                    mesh: coral,
+                    position: new THREE.Vector3(x, 5, z), // 投影到白海豚巡航高度 5
+                    radius: radius * 1.2
+                });
+            }
+
+
+            // ------------------------------------------
+            // D. 安全區：新家園 (Safe Zone)
+            // ------------------------------------------
+            // 新家園放在地圖最北端，象徵純淨無汙染的海域
+            safeZone = new THREE.Group();
+            safeZone.position.set(0, 5, -140);
+            scene.add(safeZone);
+
+            // 安全區核心：綠色透光發光球體
+            const zoneGeo = new THREE.SphereGeometry(15, 32, 32);
+            const zoneMat = new THREE.MeshBasicMaterial({
+                color: 0x10b981,
+                transparent: true,
+                opacity: 0.25,
+                wireframe: true // 環繞網格線，視覺化「安全結界」
+            });
+            const zoneMesh = new THREE.Mesh(zoneGeo, zoneMat);
+            safeZone.add(zoneMesh);
+
+            // 安全區內部放一個實體光圈發光點
+            const coreGeo = new THREE.BoxGeometry(4, 4, 4);
+            const coreMat = new THREE.MeshStandardMaterial({
+                color: 0x34d399,
+                emissive: 0x10b981,
+                emissiveIntensity: 1.5,
+                roughness: 0.2
+            });
+            const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+            safeZone.add(coreMesh);
+            safeZone.userData = { coreMesh: coreMesh }; // 方便動畫旋轉
+        }
+
+        // ==========================================
+        // 5. 鍵盤輸入控制 (精確支援大小寫與方向鍵)
+        // ==========================================
+        function setupInput() {
+            window.addEventListener('keydown', (e) => {
+                const key = e.key.toLowerCase();
+                // 映射鍵盤狀態 (同時偵測小寫/大寫與 ArrowKeys)
+                if (key === 'w' || e.key === 'ArrowUp') {
+                    keys.w = true;
+                    keys.ArrowUp = true;
+                }
+                if (key === 'a' || e.key === 'ArrowLeft') {
+                    keys.a = true;
+                    keys.ArrowLeft = true;
+                }
+                if (key === 's' || e.key === 'ArrowDown') {
+                    keys.s = true;
+                    keys.ArrowDown = true;
+                }
+                if (key === 'd' || e.key === 'ArrowRight') {
+                    keys.d = true;
+                    keys.ArrowRight = true;
+                }
+            });
+
+            window.addEventListener('keyup', (e) => {
+                const key = e.key.toLowerCase();
+                if (key === 'w' || e.key === 'ArrowUp') {
+                    keys.w = false;
+                    keys.ArrowUp = false;
+                }
+                if (key === 'a' || e.key === 'ArrowLeft') {
+                    keys.a = false;
+                    keys.ArrowLeft = false;
+                }
+                if (key === 's' || e.key === 'ArrowDown') {
+                    keys.s = false;
+                    keys.ArrowDown = false;
+                }
+                if (key === 'd' || e.key === 'ArrowRight') {
+                    keys.d = false;
+                    keys.ArrowRight = false;
+                }
+            });
+        }
+
+        // ==========================================
+        // 6. UI 事件與重置邏輯
+        // ==========================================
+        function setupUIEvents() {
+            const startBtn = document.getElementById('start-btn');
+            const restartBtn = document.getElementById('restart-btn');
+            const startScreen = document.getElementById('start-screen');
+            const gameOverScreen = document.getElementById('game-over-screen');
+            const statusBar = document.getElementById('status-bar');
+            const controlHints = document.getElementById('control-hints');
+
+            // 點擊「開始遊戲」
+            startBtn.addEventListener('click', () => {
+                startScreen.style.opacity = '0';
+                setTimeout(() => {
+                    startScreen.classList.add('hidden');
+                    statusBar.classList.remove('hidden');
+                    controlHints.classList.remove('hidden');
+                    resetGame();
+                    isGameActive = true;
+                }, 500);
+            });
+
+            // 點擊「重新開始」
+            restartBtn.addEventListener('click', () => {
+                gameOverScreen.style.opacity = '0';
+                setTimeout(() => {
+                    gameOverScreen.classList.add('hidden');
+                    resetGame();
+                    isGameActive = true;
+                }, 500);
+            });
+        }
+
+        // 重置海豚位置、鍵盤狀態，開始新遊戲
+        function resetGame() {
+            dolphin.position.set(0, 5, 150);
+            dolphin.rotation.set(0, 0, 0); // 朝向北方 (Z軸負方向前進)
+            
+            // 重置所有按鍵狀態
+            for (let key in keys) {
+                keys[key] = false;
+            }
+
+            // 重算時鐘防止時間跳躍
+            clock.getDelta();
+        }
+
+        // ==========================================
+        // 7. 碰撞偵測核心邏輯 (勝負判定)
+        // ==========================================
+        function checkCollisions() {
+            const dPos = dolphin.position;
+            const dolphinRadius = 1.8; // 白海豚包圍圓半徑
+
+            // 1. 偵測是否游出地圖邊界 (防止玩家游走無限空間)
+            const halfMap = MAP_SIZE / 2;
+            if (dPos.x < -halfMap) dPos.x = -halfMap;
+            if (dPos.x > halfMap) dPos.x = halfMap;
+            if (dPos.z < -halfMap) dPos.z = -halfMap;
+            if (dPos.z > halfMap) dPos.z = halfMap;
+
+            // 2. 偵測與「打樁機噪音範圍 (紅色半透明球)」的碰撞
+            for (let i = 0; i < noiseSpheres.length; i++) {
+                const noise = noiseSpheres[i];
+                // 計算海豚中心到打樁機噪音源中心的 2D 距離 (在 Y=5 水平面上)
+                const dist = dPos.distanceTo(noise.worldPos);
+                
+                // 兩圓半徑相加與實際距離比對
+                if (dist < (noise.radius + dolphinRadius)) {
+                    triggerGameOver(false); // 觸碰噪音危險，判定失敗！
+                    return;
+                }
+            }
+
+            // 3. 偵測與「白化珊瑚礁 (白色錐體)」的碰撞
+            for (let i = 0; i < obstacles.length; i++) {
+                const obs = obstacles[i];
+                const dist = dPos.distanceTo(obs.position);
+                if (dist < (obs.radius + dolphinRadius)) {
+                    triggerGameOver(false); // 碰撞到珊瑚礁，同樣造成受傷失敗
+                    return;
+                }
+            }
+
+            // 4. 偵測是否成功抵達「安全新家園 (綠色發光球)」
+            const distToSafe = dPos.distanceTo(safeZone.position);
+            const safeZoneRadius = 15; // 安全新家園的半徑
+            
+            // 即時更新頂部狀態欄
+            const distTxt = document.getElementById('distance-txt');
+            const realDist = Math.max(0, Math.round(distToSafe - safeZoneRadius));
+            distTxt.innerText = realDist;
+
+            if (distToSafe < (safeZoneRadius + dolphinRadius)) {
+                triggerGameOver(true); // 成功抵達新家園，獲勝！
+            }
+        }
+
+        // 觸發遊戲結束畫面
+        function triggerGameOver(isWin) {
+            isGameActive = false;
+            
+            const gameOverScreen = document.getElementById('game-over-screen');
+            const resultIconContainer = document.getElementById('result-icon-container');
+            const resultTitle = document.getElementById('result-title');
+            const resultDesc = document.getElementById('result-desc');
+
+            // 依勝負結果渲染不同 UI 與科普知識
+            if (isWin) {
+                // 勝利圖示 (綠色盾牌/勾選)
+                resultIconContainer.className = "w-24 h-24 mx-auto mb-6 flex items-center justify-center rounded-full bg-emerald-500/20 border border-emerald-500 text-emerald-400";
+                resultIconContainer.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-12 h-12">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
+                    </svg>
+                `;
+                resultTitle.innerText = "成功抵達新家園！";
+                resultTitle.className = "text-3xl font-extrabold mb-4 text-emerald-400";
+                resultDesc.innerHTML = "<strong>做得好！白海豚成功逃離了打樁噪音危害。</strong><br><br>減緩海上打樁噪音可以使用『氣泡幕（Bubble Curtain）』等減噪工法。建立保護區並減少人為噪音，才能讓台灣的白海豚生生不息！";
+            } else {
+                // 失敗圖示 (紅色警告)
+                resultIconContainer.className = "w-24 h-24 mx-auto mb-6 flex items-center justify-center rounded-full bg-red-500/20 border border-red-500 text-red-400";
+                resultIconContainer.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-12 h-12">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.249-8.25-3.286Zm0 13.036h.008v.008H12v-.008Z" />
+                    </svg>
+                `;
+                resultTitle.innerText = "噪音太大，白海豚無法生存！";
+                resultTitle.className = "text-3xl font-extrabold mb-4 text-red-500";
+                resultDesc.innerHTML = "<strong>打樁發出的低頻噪音會使白海豚喪失回聲定位功能，造成迷航、聽力受損甚至擱淺。</strong><br><br>我們在發展綠色離岸風電時，必須嚴格執行水下減噪規範（如要求打樁噪音低於160分貝），否則綠能的代價將是美麗物種的消逝！";
+            }
+
+            // 顯示結算畫面
+            gameOverScreen.classList.remove('hidden');
+            gameOverScreen.style.opacity = '1';
+        }
+
+        // ==========================================
+        // 8. 遊戲迴圈與主動畫 (精準第三人稱跟隨)
+        // ==========================================
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // 計算影格間隔時間 (確保任何螢幕更新率下移動速度一致)
+            const delta = clock.getDelta();
+
+            if (isGameActive) {
+                // A. 處理白海豚的旋轉與移動
+                let isMoving = false;
+
+                // 左右轉動 (A/D 或方向鍵 左/右)
+                if (keys.a || keys.ArrowLeft) {
+                    dolphin.rotation.y += DOLPHIN_ROT_SPEED * delta;
+                }
+                if (keys.d || keys.ArrowRight) {
+                    dolphin.rotation.y -= DOLPHIN_ROT_SPEED * delta;
+                }
+
+                // 前進後退 (W/S 或方向鍵 上/下)
+                const moveDirection = new THREE.Vector3(0, 0, -1); // 預設向前 (負 Z 向)
+                moveDirection.applyQuaternion(dolphin.quaternion); // 根據旋轉角度變更方向向量
+
+                if (keys.w || keys.ArrowUp) {
+                    dolphin.position.addScaledVector(moveDirection, DOLPHIN_SPEED * delta);
+                    isMoving = true;
+                }
+                if (keys.s || keys.ArrowDown) {
+                    // 後退時速度減半，增加寫實度
+                    dolphin.position.addScaledVector(moveDirection, -DOLPHIN_SPEED * 0.5 * delta);
+                    isMoving = true;
+                }
+
+                // 微幅上下游動動畫 (當有在移動時，讓海豚在 Y 軸輕微上下擺動)
+                if (isMoving) {
+                    const elapsedTime = clock.getElapsedTime();
+                    dolphin.position.y = 5 + Math.sin(elapsedTime * 6) * 0.7; // 游動起伏
+                    
+                    // 游動時身體微傾 (x 軸俯仰角度)
+                    const mesh = dolphin.getObjectByName("geometry_mesh");
+                    if (mesh) {
+                        mesh.rotation.x = Math.sin(elapsedTime * 6) * 0.15;
+                    }
+                } else {
+                    // 靜止時慢慢回到原高度
+                    dolphin.position.y = THREE.MathUtils.lerp(dolphin.position.y, 5, 0.1);
+                    const mesh = dolphin.getObjectByName("geometry_mesh");
+                    if (mesh) {
+                        mesh.rotation.x = THREE.MathUtils.lerp(mesh.rotation.x, 0, 0.1);
+                    }
+                }
+
+                // 進行勝負與碰撞判定
+                checkCollisions();
+            }
+
+            // B. 攝影機平滑跟隨 (經典第三人稱視角控制)
+            // 攝影機將保持在白海豚「斜後方偏上」的相對位置
+            const relativeCameraOffset = new THREE.Vector3(0, 8, 20); // X(左右偏離), Y(高低), Z(前後距離)
+            
+            // 計算在海豚旋轉狀態下的相對位移向量
+            const cameraOffset = relativeCameraOffset.applyQuaternion(dolphin.quaternion);
+            
+            // 目標攝影機世界座標 = 海豚位置 + 相對位移
+            const targetCameraPosition = dolphin.position.clone().add(cameraOffset);
+            
+            // 使用線性插值 (Lerp) 讓鏡頭移動更滑順，避免硬梆梆的死板跟隨
+            camera.position.lerp(targetCameraPosition, 0.08);
+            
+            // 鏡頭方向永遠鎖定白海豚
+            camera.lookAt(dolphin.position.clone().add(new THREE.Vector3(0, 2, -3)));
+
+
+            // C. 環境動態特效：海底氣泡粒子飄浮更新
+            if (bubbleParticles) {
+                const positions = bubbleParticles.geometry.attributes.position.array;
+                const speeds = bubbleParticles.userData.speeds;
+                const time = clock.getElapsedTime();
+
+                for (let i = 0; i < BUBBLE_COUNT; i++) {
+                    const speed = speeds[i];
+                    // 氣泡往上升
+                    positions[i * 3 + 1] += speed.y * delta * 2;
+                    // 微幅左右擺動
+                    positions[i * 3] += Math.sin(time * speed.freq) * speed.xShift * 0.05;
+
+                    // 當氣泡升得太高 (例如超過 35)，將其重置回海底
+                    if (positions[i * 3 + 1] > 35) {
+                        positions[i * 3 + 1] = 0;
+                        positions[i * 3] = (Math.random() - 0.5) * MAP_SIZE;
+                        positions[i * 3 + 2] = (Math.random() - 0.5) * MAP_SIZE;
+                    }
+                }
+                bubbleParticles.geometry.attributes.position.needsUpdate = true;
+            }
+
+
+            // D. 視覺特效：噪音紅色波紋動畫與安全家園旋轉
+            const time = clock.getElapsedTime();
+            
+            // 1. 紅色噪音半透明波紋：收縮與擴張，視覺化干擾波
+            noiseSpheres.forEach(noise => {
+                const pulseScale = 1.0 + Math.sin(time * 4) * 0.04; // 溫和地波動膨脹
+                noise.mesh.scale.set(pulseScale, pulseScale, pulseScale);
+            });
+
+            // 2. 安全新家園：方塊主體持續旋轉，發出迷人綠光
+            if (safeZone && safeZone.userData.coreMesh) {
+                safeZone.userData.coreMesh.rotation.x += 0.01;
+                safeZone.userData.coreMesh.rotation.y += 0.02;
+            }
+
+            // 執行渲染
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>
