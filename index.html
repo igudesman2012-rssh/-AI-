@@ -37,17 +37,17 @@
         .step-card:hover {
             transform: translateY(-8px);
         }
-        .podcast-card {
+        .podcast-card, .game-card {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        .podcast-card:hover {
+        .podcast-card:hover, .game-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
         }
-        .podcast-card:hover .play-overlay {
+        .podcast-card:hover .play-overlay, .game-card:hover .play-overlay {
             opacity: 1;
         }
-        .podcast-card:hover .cover-img {
+        .podcast-card:hover .cover-img, .game-card:hover .cover-img {
             transform: scale(1.05);
         }
         .cover-img {
@@ -78,17 +78,19 @@
                 <div class="bg-gradient-to-br from-blue-500 to-teal-400 p-2 rounded-lg text-white">
                     <i class="fas fa-water text-xl"></i>
                 </div>
-                <span class="text-xl font-bold tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-teal-500 dark:from-blue-400 dark:to-teal-300">海洋教育 Podcast</span>
+                <span class="text-xl font-bold tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-teal-500 dark:from-blue-400 dark:to-teal-300">海洋教育平台</span>
             </div>
             
             <!-- 桌面版選單 -->
-            <div class="hidden md:flex space-x-8 items-center">
-                <a href="#" class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors font-medium">首頁</a>
-                <a href="#production" class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors font-medium">製作工作區</a>
-                <a href="#results" class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors font-medium">學生作品展</a>
+            <div class="hidden md:flex space-x-6 lg:space-x-8 items-center">
+                <a href="#" class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors font-medium text-sm lg:text-base">首頁</a>
+                <a href="#production" class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors font-medium text-sm lg:text-base">1. Podcast創作</a>
+                <a href="#game-tutorial" class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors font-medium text-sm lg:text-base">2. 小遊戲教學</a>
+                <a href="#game-results" class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors font-medium text-sm lg:text-base">3. 小遊戲展示</a>
+                <a href="#results" class="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors font-medium text-sm lg:text-base">4. Podcast展示</a>
                 
                 <!-- 暗黑模式切換按鈕 -->
-                <button id="theme-toggle" class="p-2 rounded-full bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors focus:outline-none shadow-inner">
+                <button id="theme-toggle" class="p-2 rounded-full bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors focus:outline-none shadow-inner ml-2">
                     <i id="theme-toggle-dark-icon" class="hidden fas fa-moon text-indigo-500"></i>
                     <i id="theme-toggle-light-icon" class="hidden fas fa-sun text-amber-500"></i>
                 </button>
@@ -109,8 +111,10 @@
         <!-- 手機版選單內容 -->
         <div id="mobile-menu" class="hidden md:hidden bg-white dark:bg-slate-800 border-t dark:border-slate-700 shadow-lg absolute w-full">
             <a href="#" class="block px-6 py-4 border-b border-gray-50 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-200 font-medium">首頁</a>
-            <a href="#production" class="block px-6 py-4 border-b border-gray-50 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-200 font-medium">製作工作區</a>
-            <a href="#results" class="block px-6 py-4 hover:bg-blue-50 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-200 font-medium">學生作品展</a>
+            <a href="#production" class="block px-6 py-4 border-b border-gray-50 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-200 font-medium">1. Podcast 創作總部</a>
+            <a href="#game-tutorial" class="block px-6 py-4 border-b border-gray-50 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-200 font-medium">2. AI小遊戲製作教學</a>
+            <a href="#game-results" class="block px-6 py-4 border-b border-gray-50 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-200 font-medium">3. AI小遊戲展示區</a>
+            <a href="#results" class="block px-6 py-4 hover:bg-blue-50 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-200 font-medium">4. Podcast展示區</a>
         </div>
     </nav>
 
@@ -119,7 +123,7 @@
         <!-- 背景裝飾 -->
         <div class="absolute inset-0 z-0">
             <div class="absolute inset-0 bg-gradient-to-r from-blue-900 to-teal-800 opacity-90"></div>
-            <!-- 海浪裝飾線條 (純CSS) -->
+            <!-- 海浪裝飾線條 -->
             <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none">
                 <svg class="relative block w-full h-16 md:h-24" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
                     <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C59.71,118.06,150.71,101.2,222.36,81.33,257.84,71.46,290.41,62.16,321.39,56.44Z" class="fill-gray-50 dark:fill-slate-900 transition-colors duration-300"></path>
@@ -129,23 +133,23 @@
 
         <div class="container relative z-10 mx-auto px-4 py-20 md:py-32 text-center">
             <span class="inline-block py-1 px-3 rounded-full bg-white/20 text-white text-sm font-semibold tracking-wider mb-4 border border-white/30 backdrop-blur-sm">
-                Ocean Education Project
+                Ocean Education & AI Project
             </span>
             <h1 class="text-4xl md:text-6xl font-black text-white mb-6 drop-shadow-lg tracking-tight">
-                啟動你的 <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-blue-300">海洋之聲</span>
+                啟動你的 <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-blue-300">海洋之聲與遊戲</span>
             </h1>
             <p class="text-lg md:text-xl max-w-2xl mx-auto text-blue-100 mb-10 font-light leading-relaxed">
-                從 AI 輔助發想到雲端錄製編輯，一站式打造專業的海洋教育 Podcast。<br class="hidden md:block">探索知識，記錄觀點，分享給全世界。
+                從 AI 輔助發想到雲端錄製編輯，一站式打造專業的海洋教育 Podcast。<br class="hidden md:block">更全新加入 AI 驅動的互動小遊戲製作，讓知識學習變得更有趣！
             </p>
             <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6">
                 <a href="#production" class="group relative px-8 py-4 bg-white text-blue-800 font-bold rounded-full overflow-hidden shadow-xl hover:shadow-2xl transition-all w-full sm:w-auto text-center">
                     <span class="relative z-10 flex items-center justify-center">
-                        <i class="fas fa-rocket mr-2 text-blue-600 group-hover:animate-bounce"></i> 開始製作
+                        <i class="fas fa-rocket mr-2 text-blue-600 group-hover:animate-bounce"></i> 開始創作
                     </span>
                     <div class="absolute inset-0 h-full w-0 bg-blue-50 transition-all duration-300 ease-out group-hover:w-full"></div>
                 </a>
-                <a href="#results" class="px-8 py-4 bg-transparent text-white font-bold rounded-full border-2 border-white/50 hover:bg-white/10 hover:border-white backdrop-blur-sm transition-all w-full sm:w-auto text-center">
-                    <i class="fas fa-headphones-alt mr-2"></i> 欣賞作品展
+                <a href="#game-results" class="px-8 py-4 bg-transparent text-white font-bold rounded-full border-2 border-white/50 hover:bg-white/10 hover:border-white backdrop-blur-sm transition-all w-full sm:w-auto text-center">
+                    <i class="fas fa-gamepad mr-2"></i> 試玩小遊戲
                 </a>
             </div>
         </div>
@@ -154,7 +158,7 @@
     <main class="flex-grow">
         
         <!-- ==========================================
-             PART 1: Podcast 工作區 (三大區塊設計)
+             PART 1: Podcast 工作區 (保持不變)
              ========================================== -->
         <section id="production" class="py-20 bg-gray-50 dark:bg-slate-900 scroll-mt-10 relative z-10">
             <div class="container mx-auto px-4">
@@ -163,7 +167,7 @@
                 <div class="text-center mb-16">
                     <div class="inline-flex items-center justify-center space-x-2 mb-4">
                         <span class="h-px w-8 bg-primary"></span>
-                        <span class="text-primary font-bold tracking-widest uppercase text-sm">PART 1 工作流程</span>
+                        <span class="text-primary font-bold tracking-widest uppercase text-sm">PART 1</span>
                         <span class="h-px w-8 bg-primary"></span>
                     </div>
                     <h2 class="text-3xl md:text-4xl font-black text-gray-800 dark:text-white mb-4">Podcast 創作總部</h2>
@@ -177,9 +181,7 @@
                     
                     <!-- 卡片 1：AI 講稿生成 -->
                     <div class="step-card relative bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-xl border border-purple-100 dark:border-slate-700 overflow-hidden flex flex-col h-full group">
-                        <!-- 裝飾背景 -->
                         <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-gradient-to-br from-purple-200 to-fuchsia-200 dark:from-purple-900/30 dark:to-fuchsia-900/30 rounded-full blur-2xl opacity-50 transition-transform group-hover:scale-150"></div>
-                        
                         <div class="relative z-10 flex flex-col h-full">
                             <div class="flex items-center justify-between mb-6">
                                 <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-fuchsia-500 flex items-center justify-center text-white text-2xl shadow-lg shadow-purple-500/30">
@@ -187,19 +189,11 @@
                                 </div>
                                 <span class="text-5xl font-black text-gray-100 dark:text-slate-700/50">01</span>
                             </div>
-                            
                             <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-3">引導式講稿 AI 生成</h3>
                             <p class="text-gray-600 dark:text-gray-400 mb-6 flex-grow leading-relaxed">
                                 毫無頭緒嗎？讓專屬 AI 助理引導你，從主題發想、大綱擬定到完整的對話腳本，一步步幫你寫出引人入勝的節目內容。
                             </p>
-                            
-                            <div class="flex flex-wrap gap-2 mb-8">
-                                <span class="bg-purple-50 dark:bg-slate-700 text-purple-600 dark:text-purple-300 px-3 py-1 rounded-full text-xs font-semibold">靈感發想</span>
-                                <span class="bg-purple-50 dark:bg-slate-700 text-purple-600 dark:text-purple-300 px-3 py-1 rounded-full text-xs font-semibold">大綱擬定</span>
-                                <span class="bg-purple-50 dark:bg-slate-700 text-purple-600 dark:text-purple-300 px-3 py-1 rounded-full text-xs font-semibold">逐字稿</span>
-                            </div>
-
-                            <a href="https://gemini.google.com/share/953e3f181db8" target="_blank" class="w-full block text-center bg-purple-50 hover:bg-purple-600 text-purple-700 hover:text-white dark:bg-slate-700 dark:hover:bg-purple-600 dark:text-purple-300 dark:hover:text-white py-4 rounded-xl font-bold transition-all duration-300">
+                            <a href="https://gemini.google.com/share/fa6a9ce6ff4b" target="_blank" class="w-full block text-center bg-purple-50 hover:bg-purple-600 text-purple-700 hover:text-white dark:bg-slate-700 dark:hover:bg-purple-600 dark:text-purple-300 dark:hover:text-white py-4 rounded-xl font-bold transition-all duration-300">
                                 開啟 AI 助理 <i class="fas fa-arrow-right ml-2"></i>
                             </a>
                         </div>
@@ -207,13 +201,10 @@
 
                     <!-- 卡片 2：製作網頁 -->
                     <div class="step-card relative bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-xl border border-blue-100 dark:border-slate-700 overflow-hidden flex flex-col h-full group ring-2 ring-blue-500 ring-offset-4 ring-offset-gray-50 dark:ring-offset-slate-900 z-10 lg:-mt-4 lg:mb-4">
-                        <!-- 標籤 -->
                         <div class="absolute top-0 inset-x-0 flex justify-center">
                             <span class="bg-blue-500 text-white text-xs font-bold px-4 py-1 rounded-b-lg shadow-md uppercase tracking-wider">核心工具</span>
                         </div>
-                        <!-- 裝飾背景 -->
                         <div class="absolute top-0 left-0 -mt-10 -ml-10 w-40 h-40 bg-gradient-to-br from-blue-200 to-cyan-200 dark:from-blue-900/30 dark:to-cyan-900/30 rounded-full blur-2xl opacity-50 transition-transform group-hover:scale-150"></div>
-                        
                         <div class="relative z-10 flex flex-col h-full mt-4">
                             <div class="flex items-center justify-between mb-6">
                                 <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white text-2xl shadow-lg shadow-blue-500/30">
@@ -221,18 +212,10 @@
                                 </div>
                                 <span class="text-5xl font-black text-gray-100 dark:text-slate-700/50">02</span>
                             </div>
-                            
                             <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-3">Podcast生成網頁</h3>
                             <p class="text-gray-600 dark:text-gray-400 mb-6 flex-grow leading-relaxed">
                                 準備好講稿後，進入專屬的線上錄音室。介面簡單直覺，支援人聲錄製、音軌剪輯，並能輕鬆混音匯出最終成品。
                             </p>
-                            
-                            <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-2 mb-8 flex-grow">
-                                <li class="flex items-center"><i class="fas fa-check-circle text-blue-500 mr-2"></i> 免安裝，瀏覽器直接錄音</li>
-                                <li class="flex items-center"><i class="fas fa-check-circle text-blue-500 mr-2"></i> 支援多音軌視覺化剪輯</li>
-                                <li class="flex items-center"><i class="fas fa-check-circle text-blue-500 mr-2"></i> 一鍵匯出 MP3/WAV 格式</li>
-                            </ul>
-
                             <a href="Podcast製作網站.html" target="_blank" class="w-full block text-center bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white py-4 rounded-xl font-bold shadow-md hover:shadow-lg transition-all duration-300">
                                 開始生成專屬你的Podcast <i class="fas fa-play ml-2"></i>
                             </a>
@@ -241,9 +224,7 @@
 
                     <!-- 卡片 3：素材專區 -->
                     <div class="step-card relative bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-xl border border-teal-100 dark:border-slate-700 overflow-hidden flex flex-col h-full group">
-                        <!-- 裝飾背景 -->
                         <div class="absolute bottom-0 right-0 -mb-10 -mr-10 w-40 h-40 bg-gradient-to-br from-teal-200 to-emerald-200 dark:from-teal-900/30 dark:to-emerald-900/30 rounded-full blur-2xl opacity-50 transition-transform group-hover:scale-150"></div>
-                        
                         <div class="relative z-10 flex flex-col h-full">
                             <div class="flex items-center justify-between mb-6">
                                 <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-500 flex items-center justify-center text-white text-2xl shadow-lg shadow-teal-500/30">
@@ -251,29 +232,75 @@
                                 </div>
                                 <span class="text-5xl font-black text-gray-100 dark:text-slate-700/50">03</span>
                             </div>
-                            
                             <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-3">專案雲端素材庫</h3>
                             <p class="text-gray-600 dark:text-gray-400 mb-6 flex-grow leading-relaxed">
                                 需要背景音樂或海洋環境音效嗎？我們在 GitHub 為您準備了豐富的開源素材，包含圖片、影片及授權配樂，隨下隨用。
                             </p>
-                            
-                            <div class="grid grid-cols-3 gap-2 mb-8">
-                                <a href="https://github.com/igudesman2012-rssh/-ai-/tree/main/01-圖片" target="_blank" class="flex flex-col items-center justify-center p-2 bg-gray-50 dark:bg-slate-700 rounded-lg hover:bg-teal-50 dark:hover:bg-slate-600 transition-colors border border-gray-100 dark:border-slate-600 group/btn">
-                                    <i class="fas fa-image text-xl text-gray-400 group-hover/btn:text-teal-500 mb-1 transition-colors"></i>
-                                    <span class="text-[10px] font-bold text-gray-600 dark:text-gray-300">圖片素材</span>
-                                </a>
-                                <a href="https://github.com/igudesman2012-rssh/-ai-/tree/main/02-影片" target="_blank" class="flex flex-col items-center justify-center p-2 bg-gray-50 dark:bg-slate-700 rounded-lg hover:bg-teal-50 dark:hover:bg-slate-600 transition-colors border border-gray-100 dark:border-slate-600 group/btn">
-                                    <i class="fas fa-video text-xl text-gray-400 group-hover/btn:text-teal-500 mb-1 transition-colors"></i>
-                                    <span class="text-[10px] font-bold text-gray-600 dark:text-gray-300">影片素材</span>
-                                </a>
-                                <a href="https://github.com/igudesman2012-rssh/-ai-/tree/main/03-音樂" target="_blank" class="flex flex-col items-center justify-center p-2 bg-gray-50 dark:bg-slate-700 rounded-lg hover:bg-teal-50 dark:hover:bg-slate-600 transition-colors border border-gray-100 dark:border-slate-600 group/btn">
-                                    <i class="fas fa-music text-xl text-gray-400 group-hover/btn:text-teal-500 mb-1 transition-colors"></i>
-                                    <span class="text-[10px] font-bold text-gray-600 dark:text-gray-300">配樂音效</span>
-                                </a>
-                            </div>
-
-                            <a href="https://github.com/igudesman2012-rssh/-ai-" target="_blank" class="w-full block text-center bg-teal-50 hover:bg-teal-600 text-teal-700 hover:text-white dark:bg-slate-700 dark:hover:bg-teal-600 dark:text-teal-300 dark:hover:text-white py-4 rounded-xl font-bold transition-all duration-300">
+                            <a href="https://github.com/igudesman2012-rssh/-ai-" target="_blank" class="w-full block text-center bg-teal-50 hover:bg-teal-600 text-teal-700 hover:text-white dark:bg-slate-700 dark:hover:bg-teal-600 dark:text-teal-300 dark:hover:text-white py-4 rounded-xl font-bold transition-all duration-300 mt-auto">
                                 瀏覽 GitHub 總庫 <i class="fab fa-github ml-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             PART 2: 小遊戲製作流程教學 (NEW)
+             ========================================== -->
+        <section id="game-tutorial" class="py-20 bg-white dark:bg-slate-800 border-t border-gray-100 dark:border-slate-800 scroll-mt-10 relative z-10">
+            <div class="container mx-auto px-4">
+                
+                <!-- 標題區 -->
+                <div class="text-center mb-16">
+                    <div class="inline-flex items-center justify-center space-x-2 mb-4">
+                        <span class="h-px w-8 bg-orange-500"></span>
+                        <span class="text-orange-500 font-bold tracking-widest uppercase text-sm">PART 2</span>
+                        <span class="h-px w-8 bg-orange-500"></span>
+                    </div>
+                    <h2 class="text-3xl md:text-4xl font-black text-gray-800 dark:text-white mb-4">AI 小遊戲製作教學</h2>
+                    <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto text-lg">
+                        想把生硬的海洋知識變成有趣的互動體驗嗎？利用 AI 輔助，帶您輕鬆完成小遊戲開發。
+                    </p>
+                </div>
+
+                <!-- 雙卡片佈局 (Grid) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                    
+                    <!-- 卡片 1：教學網站 -->
+                    <div class="step-card relative bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-xl border border-orange-100 dark:border-slate-700 overflow-hidden flex flex-col h-full group">
+                        <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-gradient-to-br from-orange-200 to-amber-200 dark:from-orange-900/30 dark:to-amber-900/30 rounded-full blur-2xl opacity-50 transition-transform group-hover:scale-150"></div>
+                        <div class="relative z-10 flex flex-col h-full">
+                            <div class="flex items-center mb-6">
+                                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center text-white text-2xl shadow-lg shadow-orange-500/30 mr-4">
+                                    <i class="fas fa-gamepad"></i>
+                                </div>
+                                <h3 class="text-2xl font-bold text-gray-800 dark:text-white">小遊戲製作流程教學</h3>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-400 mb-8 flex-grow leading-relaxed">
+                                專為初學者設計的教學指南。從概念發想、工具選擇，到實際產出 HTML 遊戲網頁，一步步帶領您掌握製作要訣，讓海洋教育變得好玩又生動。
+                            </p>
+                            <a href="小遊戲製作流程教學網站(NEW).html" target="_blank" class="w-full block text-center bg-orange-50 hover:bg-orange-500 text-orange-600 hover:text-white dark:bg-slate-800 dark:border dark:border-orange-900 dark:hover:bg-orange-600 dark:text-orange-400 dark:hover:text-white py-4 rounded-xl font-bold transition-all duration-300">
+                                進入教學網站 <i class="fas fa-book-open ml-2"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 卡片 2：提示詞庫 -->
+                    <div class="step-card relative bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-xl border border-rose-100 dark:border-slate-700 overflow-hidden flex flex-col h-full group">
+                        <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-gradient-to-br from-rose-200 to-pink-200 dark:from-rose-900/30 dark:to-pink-900/30 rounded-full blur-2xl opacity-50 transition-transform group-hover:scale-150"></div>
+                        <div class="relative z-10 flex flex-col h-full">
+                            <div class="flex items-center mb-6">
+                                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center text-white text-2xl shadow-lg shadow-rose-500/30 mr-4">
+                                    <i class="fas fa-terminal"></i>
+                                </div>
+                                <h3 class="text-2xl font-bold text-gray-800 dark:text-white">小遊戲提示詞庫</h3>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-400 mb-8 flex-grow leading-relaxed">
+                                不知道怎麼跟 AI 溝通？這裡收集了經測試有效的「魔法咒語」，只要複製貼上並稍加修改海洋主題內容，就能快速生成精美的網頁互動小遊戲。
+                            </p>
+                            <a href="AI小遊戲提示詞.html" target="_blank" class="w-full block text-center bg-rose-50 hover:bg-rose-500 text-rose-600 hover:text-white dark:bg-slate-800 dark:border dark:border-rose-900 dark:hover:bg-rose-600 dark:text-rose-400 dark:hover:text-white py-4 rounded-xl font-bold transition-all duration-300">
+                                取得魔法提示詞 <i class="fas fa-magic ml-2"></i>
                             </a>
                         </div>
                     </div>
@@ -283,7 +310,85 @@
         </section>
 
         <!-- ==========================================
-             PART 2: 學生 Podcast 成果區 (預設 10 組)
+             PART 3: AI小遊戲展示區 (NEW)
+             ========================================== -->
+        <section id="game-results" class="py-20 bg-slate-50 dark:bg-slate-900/80 border-t border-gray-100 dark:border-slate-800 scroll-mt-10">
+            <div class="container mx-auto px-4">
+                
+                <!-- 標題區 -->
+                <div class="text-center mb-12">
+                    <div class="inline-flex items-center justify-center space-x-2 mb-4">
+                        <span class="h-px w-8 bg-indigo-500"></span>
+                        <span class="text-indigo-500 font-bold tracking-widest uppercase text-sm">PART 3 展示大廳</span>
+                        <span class="h-px w-8 bg-indigo-500"></span>
+                    </div>
+                    <h2 class="text-3xl md:text-4xl font-black text-gray-800 dark:text-white mb-4">AI 小遊戲展示區</h2>
+                    <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                        學生們結合海洋知識與 AI 魔法創作出的互動遊戲。點擊卡片即可開始挑戰！
+                    </p>
+                </div>
+
+                <!-- 小遊戲搜尋與過濾區 -->
+                <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm">
+                    <div class="w-full md:w-1/3 relative">
+                        <input type="text" id="game-search-input" placeholder="搜尋遊戲組別、名稱..." 
+                               class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                        <i class="fas fa-search absolute left-4 top-4 text-gray-400"></i>
+                    </div>
+                    <div class="flex space-x-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto no-scrollbar">
+                        <button class="game-filter-btn active bg-indigo-600 text-white px-5 py-2.5 rounded-full text-sm font-bold whitespace-nowrap shadow-md transition-all" data-filter="all">全部遊戲</button>
+                        <button class="game-filter-btn bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600 px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all" data-filter="completed">開放遊玩</button>
+                        <button class="game-filter-btn bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600 px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all" data-filter="pending">開發中</button>
+                    </div>
+                </div>
+
+                <!-- 小遊戲列表網格 (10個預設空間) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6" id="game-grid">
+                    
+                    <!-- Game 01 ~ 10 (使用 JavaScript 動態生成佔位符，保持 HTML 乾淨) -->
+                    <script>
+                        const gameGrid = document.getElementById('game-grid');
+                        for(let i=1; i<=10; i++) {
+                            let numStr = i < 10 ? '0' + i : i;
+                            gameGrid.innerHTML += `
+                            <div class="game-card bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl flex flex-col h-full border border-gray-100 dark:border-slate-700" data-category="pending">
+                                <div class="relative pb-[100%] overflow-hidden bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/40 dark:to-purple-900/40">
+                                    <div class="absolute inset-0 flex items-center justify-center cover-img">
+                                        <i class="fas fa-gamepad text-7xl text-indigo-300 dark:text-indigo-800/50"></i>
+                                    </div>
+                                    <span class="absolute top-3 left-3 bg-gray-500 text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm">開發中</span>
+                                    
+                                    <!-- 播放遮罩 (預設狀態不顯示播放按鈕) -->
+                                    <div class="absolute inset-0 bg-slate-900/60 flex flex-col items-center justify-center opacity-0 play-overlay transition-opacity duration-300 backdrop-blur-sm cursor-not-allowed">
+                                        <i class="fas fa-code text-3xl text-white/80 mb-2"></i>
+                                        <span class="text-white font-medium text-sm">遊戲開發中...</span>
+                                    </div>
+                                </div>
+                                <div class="p-5 flex flex-col flex-grow border-t border-gray-50 dark:border-slate-700/50">
+                                    <div class="text-xs font-bold text-indigo-400 mb-1">Game Team ${numStr}</div>
+                                    <h3 class="text-lg font-bold mb-2 text-gray-800 dark:text-white line-clamp-1">等待上線中...</h3>
+                                    <p class="text-gray-500 dark:text-gray-400 text-sm mb-4 line-clamp-2 flex-grow">
+                                        第 ${i} 組的同學正在運用 AI 開發有趣的海洋小遊戲，敬請期待！
+                                    </p>
+                                </div>
+                            </div>
+                            `;
+                        }
+                    </script>
+                    
+                    <!-- 【教學】當小遊戲完成後，將 class 中的 pending 改為 completed，並加上 data-player-src="05-AI小遊戲展示區/xxx.html" 即可 -->
+                </div>
+
+                <div id="game-no-results" class="hidden py-16 text-center text-gray-500 dark:text-gray-400 bg-white dark:bg-slate-800/50 rounded-2xl border border-dashed border-gray-200 dark:border-slate-700 mt-6">
+                    <i class="fas fa-ghost text-5xl mb-4 opacity-30"></i>
+                    <p class="text-lg font-medium">找不到符合的遊戲</p>
+                    <button class="mt-4 text-indigo-500 hover:underline text-sm font-medium" onclick="document.querySelector('.game-filter-btn[data-filter=\'all\']').click()">顯示全部</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             PART 4: 學生 Podcast 成果區 (移至此處)
              ========================================== -->
         <section id="results" class="py-20 bg-white dark:bg-dark border-t border-gray-100 dark:border-slate-800 scroll-mt-10">
             <div class="container mx-auto px-4">
@@ -292,7 +397,7 @@
                 <div class="text-center mb-12">
                     <div class="inline-flex items-center justify-center space-x-2 mb-4">
                         <span class="h-px w-8 bg-blue-500"></span>
-                        <span class="text-blue-500 font-bold tracking-widest uppercase text-sm">PART 2 展示大廳</span>
+                        <span class="text-blue-500 font-bold tracking-widest uppercase text-sm">PART 4 展示大廳</span>
                         <span class="h-px w-8 bg-blue-500"></span>
                     </div>
                     <h2 class="text-3xl md:text-4xl font-black text-gray-800 dark:text-white mb-4">學生 Podcast 成果展</h2>
@@ -301,260 +406,58 @@
                     </p>
                 </div>
 
-                <!-- 搜尋與過濾區 -->
+                <!-- Podcast 搜尋與過濾區 -->
                 <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4 bg-gray-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-gray-100 dark:border-slate-700">
                     <div class="w-full md:w-1/3 relative">
-                        <input type="text" id="search-input" placeholder="搜尋組別、節目名稱..." 
+                        <input type="text" id="podcast-search-input" placeholder="搜尋廣播組別、名稱..." 
                                class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all shadow-sm">
                         <i class="fas fa-search absolute left-4 top-4 text-gray-400"></i>
                     </div>
                     <div class="flex space-x-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto no-scrollbar">
-                        <button class="filter-btn active bg-gray-800 dark:bg-white text-white dark:text-gray-900 px-5 py-2.5 rounded-full text-sm font-bold whitespace-nowrap shadow-md transition-all transform active:scale-95" data-filter="all">全部組別</button>
-                        <button class="filter-btn bg-white dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-600 border border-gray-200 dark:border-slate-600 px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all transform active:scale-95" data-filter="completed">已上架</button>
-                        <button class="filter-btn bg-white dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-600 border border-gray-200 dark:border-slate-600 px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all transform active:scale-95" data-filter="pending">製作中</button>
+                        <button class="podcast-filter-btn active bg-gray-800 dark:bg-white text-white dark:text-gray-900 px-5 py-2.5 rounded-full text-sm font-bold whitespace-nowrap shadow-md transition-all transform active:scale-95" data-filter="all">全部組別</button>
+                        <button class="podcast-filter-btn bg-white dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-600 border border-gray-200 dark:border-slate-600 px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all transform active:scale-95" data-filter="completed">已上架</button>
+                        <button class="podcast-filter-btn bg-white dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-600 border border-gray-200 dark:border-slate-600 px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all transform active:scale-95" data-filter="pending">製作中</button>
                     </div>
                 </div>
 
                 <!-- Podcast 列表網格 (10個預設空間) -->
-                <!-- 注意：這裡全部使用佔位符設計。
-                     當學生檔案準備好時：
-                     1. 將 data-category 改為 "completed"
-                     2. 替換 data-player-src="學生的HTML檔案路徑"
-                     3. 修改標題、描述、標籤顏色
-                -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6" id="podcast-grid">
                     
-                    <!-- JS 生成 10 個版塊以保持 HTML 簡潔，但為符合您的要求，我直接手寫 10 個結構 -->
-                    
-                    <!-- Group 01 -->
-                    <div class="podcast-card bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl flex flex-col h-full border border-gray-100 dark:border-slate-700" data-category="pending">
-                        <!-- 圖片/漸層區塊 -->
-                        <div class="relative pb-[100%] overflow-hidden bg-gradient-to-br from-slate-200 to-gray-300 dark:from-slate-700 dark:to-slate-800">
-                            <!-- 預設顯示巨大的組別數字作為封面 -->
-                            <div class="absolute inset-0 flex items-center justify-center cover-img">
-                                <span class="text-8xl font-black text-white/40 dark:text-black/20">01</span>
-                            </div>
-                            
-                            <!-- 狀態標籤 -->
-                            <span class="absolute top-3 left-3 bg-gray-500 text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm">製作中</span>
-                            
-                            <!-- 播放遮罩 (預設狀態不顯示播放按鈕，只顯示敬請期待) -->
-                            <div class="absolute inset-0 bg-slate-900/60 flex flex-col items-center justify-center opacity-0 play-overlay transition-opacity duration-300 backdrop-blur-sm cursor-not-allowed">
-                                <i class="fas fa-tools text-3xl text-white/80 mb-2"></i>
-                                <span class="text-white font-medium text-sm">尚未上傳檔案</span>
-                            </div>
-                        </div>
-                        
-                        <!-- 內容區 -->
-                        <div class="p-5 flex flex-col flex-grow">
-                            <div class="text-xs font-bold text-gray-400 mb-1">Group 01</div>
-                            <h3 class="text-lg font-bold mb-2 text-gray-800 dark:text-white line-clamp-1">等待發布中...</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-sm mb-4 line-clamp-2 flex-grow">
-                                第 1 組的同學正在努力製作他們的海洋 Podcast，敬請期待他們精彩的作品！
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Group 02 -->
-                    <div class="podcast-card bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl flex flex-col h-full border border-gray-100 dark:border-slate-700" data-category="pending">
-                        <div class="relative pb-[100%] overflow-hidden bg-gradient-to-br from-slate-200 to-gray-300 dark:from-slate-700 dark:to-slate-800">
-                            <div class="absolute inset-0 flex items-center justify-center cover-img">
-                                <span class="text-8xl font-black text-white/40 dark:text-black/20">02</span>
-                            </div>
-                            <span class="absolute top-3 left-3 bg-gray-500 text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm">製作中</span>
-                            <div class="absolute inset-0 bg-slate-900/60 flex flex-col items-center justify-center opacity-0 play-overlay transition-opacity duration-300 backdrop-blur-sm cursor-not-allowed">
-                                <i class="fas fa-tools text-3xl text-white/80 mb-2"></i>
-                                <span class="text-white font-medium text-sm">尚未上傳檔案</span>
-                            </div>
-                        </div>
-                        <div class="p-5 flex flex-col flex-grow">
-                            <div class="text-xs font-bold text-gray-400 mb-1">Group 02</div>
-                            <h3 class="text-lg font-bold mb-2 text-gray-800 dark:text-white line-clamp-1">等待發布中...</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-sm mb-4 line-clamp-2 flex-grow">第 2 組的同學正在努力製作他們的海洋 Podcast，敬請期待他們精彩的作品！</p>
-                        </div>
-                    </div>
-
-                    <!-- Group 03 -->
-                    <div class="podcast-card bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl flex flex-col h-full border border-gray-100 dark:border-slate-700" data-category="pending">
-                        <div class="relative pb-[100%] overflow-hidden bg-gradient-to-br from-slate-200 to-gray-300 dark:from-slate-700 dark:to-slate-800">
-                            <div class="absolute inset-0 flex items-center justify-center cover-img">
-                                <span class="text-8xl font-black text-white/40 dark:text-black/20">03</span>
-                            </div>
-                            <span class="absolute top-3 left-3 bg-gray-500 text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm">製作中</span>
-                            <div class="absolute inset-0 bg-slate-900/60 flex flex-col items-center justify-center opacity-0 play-overlay transition-opacity duration-300 backdrop-blur-sm cursor-not-allowed">
-                                <i class="fas fa-tools text-3xl text-white/80 mb-2"></i>
-                                <span class="text-white font-medium text-sm">尚未上傳檔案</span>
-                            </div>
-                        </div>
-                        <div class="p-5 flex flex-col flex-grow">
-                            <div class="text-xs font-bold text-gray-400 mb-1">Group 03</div>
-                            <h3 class="text-lg font-bold mb-2 text-gray-800 dark:text-white line-clamp-1">等待發布中...</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-sm mb-4 line-clamp-2 flex-grow">第 3 組的同學正在努力製作他們的海洋 Podcast，敬請期待他們精彩的作品！</p>
-                        </div>
-                    </div>
-
-                    <!-- Group 04 -->
-                    <div class="podcast-card bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl flex flex-col h-full border border-gray-100 dark:border-slate-700" data-category="pending">
-                        <div class="relative pb-[100%] overflow-hidden bg-gradient-to-br from-slate-200 to-gray-300 dark:from-slate-700 dark:to-slate-800">
-                            <div class="absolute inset-0 flex items-center justify-center cover-img">
-                                <span class="text-8xl font-black text-white/40 dark:text-black/20">04</span>
-                            </div>
-                            <span class="absolute top-3 left-3 bg-gray-500 text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm">製作中</span>
-                            <div class="absolute inset-0 bg-slate-900/60 flex flex-col items-center justify-center opacity-0 play-overlay transition-opacity duration-300 backdrop-blur-sm cursor-not-allowed">
-                                <i class="fas fa-tools text-3xl text-white/80 mb-2"></i>
-                                <span class="text-white font-medium text-sm">尚未上傳檔案</span>
-                            </div>
-                        </div>
-                        <div class="p-5 flex flex-col flex-grow">
-                            <div class="text-xs font-bold text-gray-400 mb-1">Group 04</div>
-                            <h3 class="text-lg font-bold mb-2 text-gray-800 dark:text-white line-clamp-1">等待發布中...</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-sm mb-4 line-clamp-2 flex-grow">第 4 組的同學正在努力製作他們的海洋 Podcast，敬請期待他們精彩的作品！</p>
-                        </div>
-                    </div>
-
-                    <!-- Group 05 -->
-                    <div class="podcast-card bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl flex flex-col h-full border border-gray-100 dark:border-slate-700" data-category="pending">
-                        <div class="relative pb-[100%] overflow-hidden bg-gradient-to-br from-slate-200 to-gray-300 dark:from-slate-700 dark:to-slate-800">
-                            <div class="absolute inset-0 flex items-center justify-center cover-img">
-                                <span class="text-8xl font-black text-white/40 dark:text-black/20">05</span>
-                            </div>
-                            <span class="absolute top-3 left-3 bg-gray-500 text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm">製作中</span>
-                            <div class="absolute inset-0 bg-slate-900/60 flex flex-col items-center justify-center opacity-0 play-overlay transition-opacity duration-300 backdrop-blur-sm cursor-not-allowed">
-                                <i class="fas fa-tools text-3xl text-white/80 mb-2"></i>
-                                <span class="text-white font-medium text-sm">尚未上傳檔案</span>
-                            </div>
-                        </div>
-                        <div class="p-5 flex flex-col flex-grow">
-                            <div class="text-xs font-bold text-gray-400 mb-1">Group 05</div>
-                            <h3 class="text-lg font-bold mb-2 text-gray-800 dark:text-white line-clamp-1">等待發布中...</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-sm mb-4 line-clamp-2 flex-grow">第 5 組的同學正在努力製作他們的海洋 Podcast，敬請期待他們精彩的作品！</p>
-                        </div>
-                    </div>
-                    
-                    <!-- Group 06 -->
-                    <div class="podcast-card bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl flex flex-col h-full border border-gray-100 dark:border-slate-700" data-category="pending">
-                        <div class="relative pb-[100%] overflow-hidden bg-gradient-to-br from-slate-200 to-gray-300 dark:from-slate-700 dark:to-slate-800">
-                            <div class="absolute inset-0 flex items-center justify-center cover-img">
-                                <span class="text-8xl font-black text-white/40 dark:text-black/20">06</span>
-                            </div>
-                            <span class="absolute top-3 left-3 bg-gray-500 text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm">製作中</span>
-                            <div class="absolute inset-0 bg-slate-900/60 flex flex-col items-center justify-center opacity-0 play-overlay transition-opacity duration-300 backdrop-blur-sm cursor-not-allowed">
-                                <i class="fas fa-tools text-3xl text-white/80 mb-2"></i>
-                                <span class="text-white font-medium text-sm">尚未上傳檔案</span>
-                            </div>
-                        </div>
-                        <div class="p-5 flex flex-col flex-grow">
-                            <div class="text-xs font-bold text-gray-400 mb-1">Group 06</div>
-                            <h3 class="text-lg font-bold mb-2 text-gray-800 dark:text-white line-clamp-1">等待發布中...</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-sm mb-4 line-clamp-2 flex-grow">第 6 組的同學正在努力製作他們的海洋 Podcast，敬請期待他們精彩的作品！</p>
-                        </div>
-                    </div>
-
-                    <!-- Group 07 -->
-                    <div class="podcast-card bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl flex flex-col h-full border border-gray-100 dark:border-slate-700" data-category="pending">
-                        <div class="relative pb-[100%] overflow-hidden bg-gradient-to-br from-slate-200 to-gray-300 dark:from-slate-700 dark:to-slate-800">
-                            <div class="absolute inset-0 flex items-center justify-center cover-img">
-                                <span class="text-8xl font-black text-white/40 dark:text-black/20">07</span>
-                            </div>
-                            <span class="absolute top-3 left-3 bg-gray-500 text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm">製作中</span>
-                            <div class="absolute inset-0 bg-slate-900/60 flex flex-col items-center justify-center opacity-0 play-overlay transition-opacity duration-300 backdrop-blur-sm cursor-not-allowed">
-                                <i class="fas fa-tools text-3xl text-white/80 mb-2"></i>
-                                <span class="text-white font-medium text-sm">尚未上傳檔案</span>
-                            </div>
-                        </div>
-                        <div class="p-5 flex flex-col flex-grow">
-                            <div class="text-xs font-bold text-gray-400 mb-1">Group 07</div>
-                            <h3 class="text-lg font-bold mb-2 text-gray-800 dark:text-white line-clamp-1">等待發布中...</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-sm mb-4 line-clamp-2 flex-grow">第 7 組的同學正在努力製作他們的海洋 Podcast，敬請期待他們精彩的作品！</p>
-                        </div>
-                    </div>
-
-                    <!-- Group 08 -->
-                    <div class="podcast-card bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl flex flex-col h-full border border-gray-100 dark:border-slate-700" data-category="pending">
-                        <div class="relative pb-[100%] overflow-hidden bg-gradient-to-br from-slate-200 to-gray-300 dark:from-slate-700 dark:to-slate-800">
-                            <div class="absolute inset-0 flex items-center justify-center cover-img">
-                                <span class="text-8xl font-black text-white/40 dark:text-black/20">08</span>
-                            </div>
-                            <span class="absolute top-3 left-3 bg-gray-500 text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm">製作中</span>
-                            <div class="absolute inset-0 bg-slate-900/60 flex flex-col items-center justify-center opacity-0 play-overlay transition-opacity duration-300 backdrop-blur-sm cursor-not-allowed">
-                                <i class="fas fa-tools text-3xl text-white/80 mb-2"></i>
-                                <span class="text-white font-medium text-sm">尚未上傳檔案</span>
-                            </div>
-                        </div>
-                        <div class="p-5 flex flex-col flex-grow">
-                            <div class="text-xs font-bold text-gray-400 mb-1">Group 08</div>
-                            <h3 class="text-lg font-bold mb-2 text-gray-800 dark:text-white line-clamp-1">等待發布中...</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-sm mb-4 line-clamp-2 flex-grow">第 8 組的同學正在努力製作他們的海洋 Podcast，敬請期待他們精彩的作品！</p>
-                        </div>
-                    </div>
-
-                    <!-- Group 09 -->
-                    <div class="podcast-card bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl flex flex-col h-full border border-gray-100 dark:border-slate-700" data-category="pending">
-                        <div class="relative pb-[100%] overflow-hidden bg-gradient-to-br from-slate-200 to-gray-300 dark:from-slate-700 dark:to-slate-800">
-                            <div class="absolute inset-0 flex items-center justify-center cover-img">
-                                <span class="text-8xl font-black text-white/40 dark:text-black/20">09</span>
-                            </div>
-                            <span class="absolute top-3 left-3 bg-gray-500 text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm">製作中</span>
-                            <div class="absolute inset-0 bg-slate-900/60 flex flex-col items-center justify-center opacity-0 play-overlay transition-opacity duration-300 backdrop-blur-sm cursor-not-allowed">
-                                <i class="fas fa-tools text-3xl text-white/80 mb-2"></i>
-                                <span class="text-white font-medium text-sm">尚未上傳檔案</span>
-                            </div>
-                        </div>
-                        <div class="p-5 flex flex-col flex-grow">
-                            <div class="text-xs font-bold text-gray-400 mb-1">Group 09</div>
-                            <h3 class="text-lg font-bold mb-2 text-gray-800 dark:text-white line-clamp-1">等待發布中...</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-sm mb-4 line-clamp-2 flex-grow">第 9 組的同學正在努力製作他們的海洋 Podcast，敬請期待他們精彩的作品！</p>
-                        </div>
-                    </div>
-
-                    <!-- Group 10 -->
-                    <div class="podcast-card bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl flex flex-col h-full border border-gray-100 dark:border-slate-700" data-category="pending">
-                        <div class="relative pb-[100%] overflow-hidden bg-gradient-to-br from-slate-200 to-gray-300 dark:from-slate-700 dark:to-slate-800">
-                            <div class="absolute inset-0 flex items-center justify-center cover-img">
-                                <span class="text-8xl font-black text-white/40 dark:text-black/20">10</span>
-                            </div>
-                            <span class="absolute top-3 left-3 bg-gray-500 text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm">製作中</span>
-                            <div class="absolute inset-0 bg-slate-900/60 flex flex-col items-center justify-center opacity-0 play-overlay transition-opacity duration-300 backdrop-blur-sm cursor-not-allowed">
-                                <i class="fas fa-tools text-3xl text-white/80 mb-2"></i>
-                                <span class="text-white font-medium text-sm">尚未上傳檔案</span>
-                            </div>
-                        </div>
-                        <div class="p-5 flex flex-col flex-grow">
-                            <div class="text-xs font-bold text-gray-400 mb-1">Group 10</div>
-                            <h3 class="text-lg font-bold mb-2 text-gray-800 dark:text-white line-clamp-1">等待發布中...</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-sm mb-4 line-clamp-2 flex-grow">第 10 組的同學正在努力製作他們的海洋 Podcast，敬請期待他們精彩的作品！</p>
-                        </div>
-                    </div>
-
-                    <!-- 【範例教學】當學生完成後，您可以將程式碼改為這樣： 
-                    <div class="podcast-card bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl flex flex-col h-full border border-gray-100 dark:border-slate-700" data-category="completed">
-                        <div class="relative pb-[100%] overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600">
-                            <div class="absolute inset-0 flex items-center justify-center cover-img">
-                                <i class="fas fa-water text-7xl text-white/50"></i>
-                            </div>
-                            <span class="absolute top-3 left-3 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm">新發布</span>
-                            
-                            <div class="absolute inset-0 bg-slate-900/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 backdrop-blur-[2px] cursor-pointer play-btn" data-player-src="學生的檔案.html">
-                                <div class="bg-white text-blue-600 rounded-full w-16 h-16 flex items-center justify-center transform hover:scale-110 transition-transform shadow-xl">
-                                    <i class="fas fa-play text-2xl ml-1"></i>
+                    <!-- Podcast 01 ~ 10 -->
+                    <script>
+                        const podcastGrid = document.getElementById('podcast-grid');
+                        for(let i=1; i<=10; i++) {
+                            let numStr = i < 10 ? '0' + i : i;
+                            podcastGrid.innerHTML += `
+                            <div class="podcast-card bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl flex flex-col h-full border border-gray-100 dark:border-slate-700" data-category="pending">
+                                <div class="relative pb-[100%] overflow-hidden bg-gradient-to-br from-slate-200 to-gray-300 dark:from-slate-700 dark:to-slate-800">
+                                    <div class="absolute inset-0 flex items-center justify-center cover-img">
+                                        <span class="text-8xl font-black text-white/40 dark:text-black/20">${numStr}</span>
+                                    </div>
+                                    <span class="absolute top-3 left-3 bg-gray-500 text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm">製作中</span>
+                                    <div class="absolute inset-0 bg-slate-900/60 flex flex-col items-center justify-center opacity-0 play-overlay transition-opacity duration-300 backdrop-blur-sm cursor-not-allowed">
+                                        <i class="fas fa-tools text-3xl text-white/80 mb-2"></i>
+                                        <span class="text-white font-medium text-sm">尚未上傳檔案</span>
+                                    </div>
+                                </div>
+                                <div class="p-5 flex flex-col flex-grow">
+                                    <div class="text-xs font-bold text-gray-400 mb-1">Group ${numStr}</div>
+                                    <h3 class="text-lg font-bold mb-2 text-gray-800 dark:text-white line-clamp-1">等待發布中...</h3>
+                                    <p class="text-gray-500 dark:text-gray-400 text-sm mb-4 line-clamp-2 flex-grow">
+                                        第 ${i} 組的同學正在努力製作他們的海洋 Podcast，敬請期待他們精彩的作品！
+                                    </p>
                                 </div>
                             </div>
-                        </div>
-                        <div class="p-5 flex flex-col flex-grow">
-                            <div class="text-xs font-bold text-blue-500 mb-1">Group 01</div>
-                            <h3 class="text-lg font-bold mb-2 text-gray-800 dark:text-white line-clamp-1">協和電廠與海洋生態</h3>
-                            <p class="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2 flex-grow">探討北部基隆協和電廠的歷史，以及其對周遭珊瑚礁與海洋生態的影響。</p>
-                        </div>
-                    </div>
-                    -->
-
+                            `;
+                        }
+                    </script>
                 </div>
 
                 <!-- 無結果提示 -->
-                <div id="no-results" class="hidden py-16 text-center text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-gray-200 dark:border-slate-700 mt-6">
+                <div id="podcast-no-results" class="hidden py-16 text-center text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-gray-200 dark:border-slate-700 mt-6">
                     <i class="fas fa-fish text-5xl mb-4 opacity-30"></i>
                     <p class="text-lg font-medium">茫茫大海中...找不到符合的組別</p>
-                    <button class="mt-4 text-primary hover:underline text-sm font-medium" onclick="document.querySelector('[data-filter=\'all\']').click()">顯示全部</button>
+                    <button class="mt-4 text-primary hover:underline text-sm font-medium" onclick="document.querySelector('.podcast-filter-btn[data-filter=\'all\']').click()">顯示全部</button>
                 </div>
 
             </div>
@@ -567,7 +470,7 @@
             <div class="flex flex-col md:flex-row justify-between items-center mb-8">
                 <div class="flex items-center space-x-2 mb-4 md:mb-0">
                     <i class="fas fa-water text-primary text-xl"></i>
-                    <span class="text-lg font-bold text-gray-800 dark:text-white">海洋教育 Podcast 計畫</span>
+                    <span class="text-lg font-bold text-gray-800 dark:text-white">海洋教育 Podcast & 遊戲平台</span>
                 </div>
                 <div class="flex space-x-4">
                     <a href="#" class="w-10 h-10 rounded-full bg-gray-100 dark:bg-slate-800 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-blue-500 hover:text-white transition-all transform hover:scale-110"><i class="fab fa-facebook-f"></i></a>
@@ -576,18 +479,18 @@
                 </div>
             </div>
             <div class="border-t border-gray-100 dark:border-slate-800 pt-8 text-center text-sm text-gray-500 dark:text-gray-500">
-                &copy; 2024 海洋教育 Podcast 專案團隊. All rights reserved. <br class="md:hidden">Made with <i class="fas fa-heart text-red-500 mx-1"></i> for the Ocean.
+                &copy; 2024 海洋教育 專案團隊. All rights reserved. <br class="md:hidden">Made with <i class="fas fa-heart text-red-500 mx-1"></i> for the Ocean.
             </div>
         </div>
     </footer>
 
-    <!-- 全螢幕播放器 Modal -->
+    <!-- 全螢幕播放器 Modal (供 Podcast 與 小遊戲 共用) -->
     <div id="player-modal" class="fixed inset-0 z-[100] bg-slate-900/95 backdrop-blur-sm hidden flex-col transition-opacity duration-300 opacity-0">
         <!-- 頂部控制列 -->
         <div class="flex justify-between items-center p-4 bg-black/50 text-white">
             <div class="flex items-center space-x-2">
-                <i class="fas fa-headphones text-primary"></i>
-                <span class="font-bold tracking-wider">正在播放學生作品</span>
+                <i class="fas fa-desktop text-primary"></i>
+                <span class="font-bold tracking-wider" id="player-title">正在載入學生作品...</span>
             </div>
             <button id="close-player-btn" class="text-white/70 hover:text-white bg-white/10 hover:bg-red-500 rounded-full w-10 h-10 flex items-center justify-center transition-all focus:outline-none">
                 <i class="fas fa-times text-xl"></i>
@@ -597,7 +500,7 @@
         <!-- Iframe 容器 -->
         <div class="flex-grow w-full h-full p-2 md:p-6 pb-0">
             <div class="w-full h-full bg-black rounded-t-xl overflow-hidden shadow-2xl relative">
-                <!-- 載入中動畫 (可選，防止白畫面過久) -->
+                <!-- 載入中動畫 -->
                 <div class="absolute inset-0 flex items-center justify-center bg-slate-800 z-0">
                     <i class="fas fa-circle-notch fa-spin text-4xl text-primary"></i>
                 </div>
@@ -617,7 +520,6 @@
         const themeToggleDarkIconMobile = document.getElementById('theme-toggle-dark-icon-mobile');
         const themeToggleLightIconMobile = document.getElementById('theme-toggle-light-icon-mobile');
 
-        // 檢查並套用主題
         function applyTheme(isDark) {
             if (isDark) {
                 document.documentElement.classList.add('dark');
@@ -634,7 +536,6 @@
             }
         }
 
-        // 初始化
         if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             applyTheme(true);
         } else {
@@ -668,82 +569,103 @@
             });
         });
 
-        // --- 搜尋與過濾邏輯 (針對 Part 2) ---
-        const searchInput = document.getElementById('search-input');
-        const filterBtns = document.querySelectorAll('.filter-btn');
-        const podcastCards = document.querySelectorAll('.podcast-card');
-        const noResultsMsg = document.getElementById('no-results');
-
-        function filterPodcasts() {
-            const searchTerm = searchInput.value.toLowerCase();
-            const activeBtn = document.querySelector('.filter-btn.active');
-            const activeFilter = activeBtn ? activeBtn.dataset.filter : 'all';
-            let visibleCount = 0;
-
-            podcastCards.forEach(card => {
-                // 取得文字內容 (組別、標題、描述)
-                const textContent = card.innerText.toLowerCase();
-                const category = card.dataset.category;
-                
-                const matchesSearch = textContent.includes(searchTerm);
-                const matchesCategory = activeFilter === 'all' || category === activeFilter;
-
-                if (matchesSearch && matchesCategory) {
-                    card.style.display = 'flex';
-                    // 加入簡單的進場動畫
-                    card.style.animation = 'fadeIn 0.3s ease-in-out forwards';
-                    visibleCount++;
-                } else {
-                    card.style.display = 'none';
+        // 動畫 Keyframes
+        if (!document.getElementById('fade-style')) {
+            const style = document.createElement('style');
+            style.id = 'fade-style';
+            style.innerHTML = `
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(10px); }
+                    to { opacity: 1; transform: translateY(0); }
                 }
-            });
-
-            if (visibleCount === 0) {
-                noResultsMsg.classList.remove('hidden');
-            } else {
-                noResultsMsg.classList.add('hidden');
-            }
+            `;
+            document.head.appendChild(style);
         }
 
-        // 動畫 Keyframes
-        const style = document.createElement('style');
-        style.innerHTML = `
-            @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(10px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-        `;
-        document.head.appendChild(style);
+        // --- 通用過濾與搜尋函數 (支援小遊戲與Podcast區塊) ---
+        function setupFilterLogic(searchInputId, filterBtnClass, cardClass, noResultsId) {
+            const searchInput = document.getElementById(searchInputId);
+            const filterBtns = document.querySelectorAll(`.${filterBtnClass}`);
+            const noResultsMsg = document.getElementById(noResultsId);
 
-        searchInput.addEventListener('input', filterPodcasts);
+            function filterItems() {
+                // 等待DOM完全載入再抓取卡片，以支援JS動態產生的DOM
+                const cards = document.querySelectorAll(`.${cardClass}`);
+                const searchTerm = searchInput.value.toLowerCase();
+                const activeBtn = document.querySelector(`.${filterBtnClass}.active`);
+                const activeFilter = activeBtn ? activeBtn.dataset.filter : 'all';
+                let visibleCount = 0;
 
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                // 按鈕樣式切換
-                filterBtns.forEach(b => {
-                    b.classList.remove('active', 'bg-gray-800', 'text-white', 'dark:bg-white', 'dark:text-gray-900');
-                    b.classList.add('bg-white', 'text-gray-600', 'dark:bg-slate-700', 'dark:text-gray-300');
+                cards.forEach(card => {
+                    const textContent = card.innerText.toLowerCase();
+                    const category = card.dataset.category;
+                    
+                    const matchesSearch = textContent.includes(searchTerm);
+                    const matchesCategory = activeFilter === 'all' || category === activeFilter;
+
+                    if (matchesSearch && matchesCategory) {
+                        card.style.display = 'flex';
+                        card.style.animation = 'fadeIn 0.3s ease-in-out forwards';
+                        visibleCount++;
+                    } else {
+                        card.style.display = 'none';
+                    }
                 });
-                
-                btn.classList.add('active', 'bg-gray-800', 'text-white', 'dark:bg-white', 'dark:text-gray-900');
-                btn.classList.remove('bg-white', 'text-gray-600', 'dark:bg-slate-700', 'dark:text-gray-300');
-                
-                filterPodcasts();
-            });
-        });
 
-        // --- 全螢幕播放器邏輯 ---
-        // 注意：目前預設的 card 是製作中，沒有 data-player-src
-        // 您之後加入 html 路徑後，點擊有 .play-btn class 的元素就會觸發
-        document.addEventListener('click', function(e) {
-            // 尋找點擊目標或其父元素是否包含 play-btn
-            const playBtn = e.target.closest('.play-btn');
+                if (visibleCount === 0 && cards.length > 0) {
+                    noResultsMsg.classList.remove('hidden');
+                } else {
+                    noResultsMsg.classList.add('hidden');
+                }
+            }
+
+            if(searchInput) searchInput.addEventListener('input', filterItems);
+
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterBtns.forEach(b => {
+                        b.classList.remove('active', 'bg-gray-800', 'text-white', 'dark:bg-white', 'dark:text-gray-900', 'bg-indigo-600');
+                        // 針對小遊戲按鈕恢復原始樣式
+                        if(filterBtnClass.includes('game')) {
+                            b.classList.add('bg-gray-100', 'text-gray-600', 'dark:bg-slate-700', 'dark:text-gray-300');
+                        } else {
+                            b.classList.add('bg-white', 'text-gray-600', 'dark:bg-slate-700', 'dark:text-gray-300');
+                        }
+                    });
+                    
+                    // 根據類別套用 active 樣式
+                    if(filterBtnClass.includes('game')) {
+                        btn.classList.add('active', 'bg-indigo-600', 'text-white');
+                        btn.classList.remove('bg-gray-100', 'text-gray-600', 'dark:bg-slate-700', 'dark:text-gray-300');
+                    } else {
+                        btn.classList.add('active', 'bg-gray-800', 'text-white', 'dark:bg-white', 'dark:text-gray-900');
+                        btn.classList.remove('bg-white', 'text-gray-600', 'dark:bg-slate-700', 'dark:text-gray-300');
+                    }
+                    
+                    filterItems();
+                });
+            });
             
+            // 初次執行確保版面正確
+            setTimeout(filterItems, 100);
+        }
+
+        // 初始化 小遊戲區塊 邏輯
+        setupFilterLogic('game-search-input', 'game-filter-btn', 'game-card', 'game-no-results');
+        
+        // 初始化 Podcast區塊 邏輯
+        setupFilterLogic('podcast-search-input', 'podcast-filter-btn', 'podcast-card', 'podcast-no-results');
+
+        // --- 全螢幕播放器邏輯 (共用) ---
+        document.addEventListener('click', function(e) {
+            const playBtn = e.target.closest('.play-btn');
             if (playBtn) {
                 e.preventDefault();
                 const src = playBtn.getAttribute('data-player-src');
                 if(src && src !== "") {
-                    openFullscreenPlayer(src);
+                    // 判斷是遊戲還是 Podcast 來更改標題圖示
+                    const isGame = playBtn.closest('.game-card') !== null;
+                    openFullscreenPlayer(src, isGame);
                 }
             }
         });
@@ -751,11 +673,19 @@
         const playerModal = document.getElementById('player-modal');
         const closePlayerBtn = document.getElementById('close-player-btn');
         const fsIframe = document.getElementById('fullscreen-iframe');
+        const playerTitle = document.getElementById('player-title');
 
-        function openFullscreenPlayer(src) {
+        function openFullscreenPlayer(src, isGame) {
+            // 更新上方標題
+            if(isGame) {
+                playerTitle.innerHTML = '<i class="fas fa-gamepad mr-2"></i>正在遊玩學生作品';
+            } else {
+                playerTitle.innerHTML = '<i class="fas fa-headphones mr-2"></i>正在播放學生Podcast';
+            }
+
             playerModal.classList.remove('hidden');
             playerModal.classList.add('flex');
-            // 淡入效果
+            
             setTimeout(() => {
                 playerModal.classList.remove('opacity-0');
                 playerModal.classList.add('opacity-100');
@@ -767,8 +697,6 @@
                 fsIframe.contentWindow.focus(); 
             };
 
-            // 請求全螢幕 (可選，這裡只做模擬全螢幕 Modal)
-            // 如果需要真正瀏覽器全螢幕可以保留以下代碼
             document.body.style.overflow = 'hidden'; // 防止背景滾動
         }
 
@@ -781,14 +709,13 @@
                 playerModal.classList.remove('flex');
                 fsIframe.src = '';
                 document.body.style.overflow = ''; // 恢復滾動
-            }, 300); // 等待淡出動畫結束
+            }, 300);
         }
 
         if(closePlayerBtn) {
             closePlayerBtn.addEventListener('click', closeFullscreenPlayer);
         }
 
-        // 點擊背景也能關閉
         playerModal.addEventListener('click', function(e) {
             if(e.target === playerModal) {
                 closeFullscreenPlayer();
