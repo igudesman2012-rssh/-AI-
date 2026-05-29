@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>搶救外木山：珊瑚大撤退 - 3D 海洋守護計畫</title>
+  
+  <!-- 引入 Tailwind CSS 提供質感 UI 介面 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- 引入 Google Fonts 提升文字美感 -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      background-color: #1a3c40;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+    /* 玻璃擬態質感 UI */
+    .glass-panel {
+      background: rgba(15, 32, 39, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    /* 搖桿樣式 */
+    #joystick-zone {
+      touch-action: none;
+    }
+  </style>
+
+  <!-- 穩定引入最新版 Three.js 的 Import Maps -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body class="relative w-screen h-screen">
+
+  <!-- ==================== UI 疊加層：主選單/開始畫面 ==================== -->
+  <div id="start-screen" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-b from-[#0f2027]/90 via-[#203a43]/90 to-[#2c5364]/95 text-white px-6 text-center">
+    <div class="max-w-xl glass-panel p-8 rounded-2xl shadow-2xl border border-cyan-500/30 transform transition-all hover:scale-[1.01]">
+      <div class="flex items-center justify-center mb-4 space-x-2">
+        <span class="text-4xl">🪸</span>
+        <h1 class="text-3xl md:text-4xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-pink-400 to-yellow-300">
+          搶救外木山：珊瑚大撤退
+        </h1>
+        <span class="text-4xl">🐠</span>
+      </div>
+      
+      <p class="text-sm md:text-base text-cyan-100 leading-relaxed mb-6 text-left border-l-4 border-pink-500 pl-4">
+        基隆外木山海岸即將面臨填海造陸工程，無數的水泥消波塊與建材將覆蓋這片美麗的海床。作為環保志工潛水艇的駕駛員，你必須在海域完全被水泥填平之前，深入海底搶救瀕臨滅絕的珍貴<b>「大型扇形珊瑚」</b>！
+      </p>
+
+      <div class="grid grid-cols-2 gap-4 mb-6 text-sm text-left">
+        <div class="bg-white/5 p-3 rounded-lg border border-white/10">
+          <p class="font-bold text-yellow-300 mb-1">🎮 操作指南 (電腦)</p>
+          <p class="text-slate-300">使用 <kbd class="px-1.5 py-0.5 bg-slate-700 rounded text-xs">W</kbd> <kbd class="px-1.5 py-0.5 bg-slate-700 rounded text-xs">A</kbd> <kbd class="px-1.5 py-0.5 bg-slate-700 rounded text-xs">S</kbd> <kbd class="px-1.5 py-0.5 bg-slate-700 rounded text-xs">D</kbd> 或方向鍵控制潛艇在海底移動。</p>
+        </div>
+        <div class="bg-white/5 p-3 rounded-lg border border-white/10">
+          <p class="font-bold text-pink-400 mb-1">📱 操作指南 (手機)</p>
+          <p class="text-slate-300">使用螢幕左下角出現的<b>虛擬搖桿</b>，自由滑動即可移動潛水艇。</p>
+        </div>
+      </div>
+
+      <div class="space-y-3 mb-6 text-sm">
+        <div class="flex justify-between border-b border-white/10 pb-1">
+          <span class="text-slate-300">🏆 勝利目標：</span>
+          <span class="font-bold text-green-400">在 60 秒內拯救 20 株珊瑚</span>
+        </div>
+        <div class="flex justify-between border-b border-white/10 pb-1">
+          <span class="text-slate-300">⚠️ 失敗條件：</span>
+          <span class="font-bold text-red-400">被落下的水泥消波塊砸中潛艇</span>
+        </div>
+      </div>
+
+      <button id="btn-start" class="w-full py-4 bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-white font-extrabold text-lg rounded-xl shadow-lg shadow-cyan-500/20 transform active:scale-95 transition-all">
+        啟動潛艇，開始搶救！
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== UI 疊加層：遊戲內 HUD ==================== -->
+  <div id="hud" class="absolute top-4 left-4 right-4 z-40 flex justify-between items-center pointer-events-none hidden">
+    <!-- 左側計分板 -->
+    <div class="glass-panel text-white px-4 py-2 rounded-xl flex items-center space-x-3 shadow-lg">
+      <div class="bg-pink-500/20 p-2 rounded-lg">
+        <span class="text-xl">🪸</span>
+      </div>
+      <div>
+        <p class="text-[10px] uppercase tracking-wider text-pink-300 font-bold">已拯救珊瑚</p>
+        <p class="text-xl font-black text-white"><span id="hud-score">0</span> <span class="text-xs text-slate-400">/ 20</span></p>
+      </div>
+    </div>
+
+    <!-- 右側計時器與狀態 -->
+    <div class="glass-panel text-white px-4 py-2 rounded-xl flex items-center space-x-3 shadow-lg">
+      <div class="bg-yellow-500/20 p-2 rounded-lg" id="timer-box">
+        <span class="text-xl">⏱️</span>
+      </div>
+      <div>
+        <p class="text-[10px] uppercase tracking-wider text-yellow-300 font-bold">剩餘時間</p>
+        <p class="text-xl font-black text-white" id="hud-timer">60s</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== UI 疊加層：結算畫面 ==================== -->
+  <div id="end-screen" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/80 text-white px-6 text-center hidden">
+    <div class="max-w-md glass-panel p-8 rounded-2xl shadow-2xl border border-red-500/30">
+      <div id="end-icon" class="text-6xl mb-4">😢</div>
+      <h2 id="end-title" class="text-3xl font-black mb-4">搶救失敗！</h2>
+      
+      <p id="end-message" class="text-sm md:text-base text-slate-300 mb-6 leading-relaxed">
+        潛艇受損，外木山海岸逐漸消失...
+      </p>
+
+      <div class="bg-white/5 p-4 rounded-xl mb-6">
+        <p class="text-xs text-slate-400 mb-1">本次搶救成果</p>
+        <p class="text-3xl font-black text-yellow-400" id="end-score">0 株珊瑚</p>
+      </div>
+
+      <!-- 環境議題導讀與呼籲 -->
+      <p class="text-[11px] text-cyan-200/70 mb-6 text-left leading-relaxed">
+        💡 <b>科普小知識：</b>外木山海域擁有基隆唯一的天然沙灘，且海底蘊藏著種類豐富的扇形珊瑚群落。填海造陸對海洋生態的衝擊是不可逆的。邀請您一起關注協和電廠更新改建與外木山生態保育議題！
+      </p>
+
+      <button id="btn-restart" class="w-full py-3.5 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white font-bold text-base rounded-xl shadow-lg shadow-pink-500/20 transform active:scale-95 transition-all">
+        重新啟動潛艇
+      </button>
+    </div>
+  </div>
+
+  <!-- 行動端虛擬搖桿觸控區域 -->
+  <div id="joystick-zone" class="absolute bottom-8 left-8 w-32 h-32 bg-white/10 rounded-full border border-white/20 z-40 hidden pointer-events-auto flex items-center justify-center">
+    <div id="joystick-knob" class="w-12 h-12 bg-cyan-400 rounded-full shadow-lg transform transition-all duration-75"></div>
+  </div>
+
+  <!-- 3D 渲染畫布容器 -->
+  <div id="canvas-container" class="w-full h-full"></div>
+
+  <!-- ==================== JavaScript 邏輯：遊戲主控台 ==================== -->
+  <script type="module">
+    import * as THREE from 'three';
+
+    /* =================================================================
+       1. 遊戲狀態與全域變數設定
+       ================================================================= */
+    const GAME_CONFIG = {
+      coralGoal: 20,           // 獲勝門檻
+      totalTime: 60,           // 倒數時間
+      worldSize: 20,           // 海床範圍 (半徑)
+      maxCorals: 5,            // 海底同時存在的最大珊瑚數量
+      cementSpawnRate: 1500,   // 水泥方塊生成頻率 (毫秒)
+      submarineSpeed: 0.18,    // 潛艇移動速度
+    };
+
+    let scene, camera, renderer;
+    let player;                // 玩家潛艇物件 (Group)
+    let bubbles = [];          // 水中氣泡粒子
+    let corals = [];           // 當前珊瑚陣列
+    let cementBlocks = [];     // 水泥障礙物陣列 (包含落下中與已著陸的)
+    
+    // 遊戲運行狀態
+    let gameState = 'START';   // START, PLAYING, GAME_OVER
+    let score = 0;
+    let timeLeft = GAME_CONFIG.totalTime;
+    let gameTimerInterval = null;
+    let cementSpawnInterval = null;
+
+    // 控制器狀態
+    const keysPressed = {};
+    let touchStartPos = null;
+    let touchMoveVector = { x: 0, z: 0 };
+    let isMobile = false;
+
+    /* =================================================================
+       2. Web Audio API 音效生成器 (免外部資源，確保完全相容與離線可用)
+       ================================================================= */
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new AudioCtx();
+      }
+    }
+
+    // 播放海底聲納 ping 聲 (氛圍音)
+    function playSonarSound() {
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 1.5);
+
+      gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+      gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1.5);
+
+      osc.start();
+      osc.stop(audioCtx.currentTime + 1.5);
+    }
+
+    // 播放收集珊瑚時的「啵啵泡泡聲」
+    function playCollectSound() {
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(900, audioCtx.currentTime + 0.2);
+
+      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.2);
+
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.25);
+    }
+
+    // 播放水泥撞擊/受損的「低沉爆炸聲」
+    function playCrashSound() {
+      if (!audioCtx) return;
+      // 結合低頻正弦波與噪音模擬巨響
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+      osc.frequency.linearRampToValueAtTime(30, audioCtx.currentTime + 0.6);
+
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
+
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.6);
+    }
+
+    /* =================================================================
+       3. 建立 3D 場景與渲染環境
+       ================================================================= */
+    function init3D() {
+      const container = document.getElementById('canvas-container');
+      
+      // 創建場景
+      scene = new THREE.Scene();
+      
+      // 指數霧氣 (FogExp2)：設定淺藍/藍綠色霧氣，模擬海水光線衰減的深海效果
+      scene.background = new THREE.Color(0x132a3a);
+      scene.fog = new THREE.FogExp2(0x132a3a, 0.045);
+
+      // 創建相機 (鳥瞰俯視視角 Top-down)
+      camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 16, 12); // 由上往下斜看
+      camera.lookAt(0, -1, -1);
+
+      // 創建渲染器
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.shadowMap.enabled = true; // 啟用陰影
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      container.appendChild(renderer.domElement);
+
+      // 設置海底光源
+      // 1. 環境光：模擬海底微弱散射光
+      const ambientLight = new THREE.AmbientLight(0x3a5f6f, 1.2);
+      scene.add(ambientLight);
+
+      // 2. 主平行光：模擬水面折射下來的強烈陽光 (投射陰影)
+      const sunLight = new THREE.DirectionalLight(0xdffff, 1.5);
+      sunLight.position.set(10, 30, 10);
+      sunLight.castShadow = true;
+      sunLight.shadow.mapSize.width = 1024;
+      sunLight.shadow.mapSize.height = 1024;
+      sunLight.shadow.camera.near = 0.5;
+      sunLight.shadow.camera.far = 50;
+      const d = GAME_CONFIG.worldSize;
+      sunLight.shadow.camera.left = -d;
+      sunLight.shadow.camera.right = d;
+      sunLight.shadow.camera.top = d;
+      sunLight.shadow.camera.bottom = -d;
+      scene.add(sunLight);
+
+      // 建立海床與氣泡
+      buildSeabed();
+      createBubbles();
+    }
+
+    /* =================================================================
+       4. 物件建造：玩家潛艇、崎嶇海床、氣泡
+       ================================================================= */
+    
+    /* -------------------------------------------------------------
+       【未來更換 3D 模型 (.gltf / .glb) 的擴充指引】
+       
+       如果您未來想要將以下的基礎幾何圖形 (Cylinder, Sphere) 替換為炫酷的
+       3D 外部美術模型，請按照以下步驟操作：
+
+       1. 於 HTML 的 importmap 中加入 GLTFLoader 的模組映射，例如：
+          "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+          
+       2. 在程式碼頂部引入 GLTFLoader 載入器：
+          import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+       3. 宣告載入器變數：
+          const loader = new GLTFLoader();
+
+       4. 替換下方建立潛艇、珊瑚或水泥塊的函式：
+          例如將 buildPlayer() 改寫為：
+          
+          function buildPlayer() {
+            player = new THREE.Group(); // 依然使用 Group 包裝以便於控制
+            loader.load('models/yellow_submarine.gltf', (gltf) => {
+              const model = gltf.scene;
+              model.scale.set(0.5, 0.5, 0.5); // 依模型大小進行縮放
+              model.traverse((child) => {
+                if (child.isMesh) {
+                  child.castShadow = true;
+                  child.receiveShadow = true;
+                }
+              });
+              player.add(model);
+            }, undefined, (error) => {
+              console.error('載入 GLTF 失敗，改用原幾何體作為備案：', error);
+              // 備案：執行原本的黃色 Cylinder 生成邏輯
+            });
+            scene.add(player);
+          }
+       ------------------------------------------------------------- */
+
+    // 建立黃色潛水艇
+    function buildPlayer() {
+      // 移除舊有潛艇
+      if (player) scene.remove(player);
+
+      player = new THREE.Group();
+
+      // 1. 潛艇主體 (黃色圓柱，打橫放置作為艇身)
+      const bodyGeo = new THREE.CylinderGeometry(0.5, 0.5, 2.0, 16);
+      const yellowMat = new THREE.MeshStandardMaterial({
+        color: 0xffd700,
+        roughness: 0.3,
+        metalness: 0.6
+      });
+      const body = new THREE.Mesh(bodyGeo, yellowMat);
+      body.rotation.z = Math.PI / 2; // 將圓柱橫躺
+      body.castShadow = true;
+      body.receiveShadow = true;
+      player.add(body);
+
+      // 2. 潛艇玻璃觀景艙 (半球體，朝前)
+      const domeGeo = new THREE.SphereGeometry(0.5, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+      const glassMat = new THREE.MeshStandardMaterial({
+        color: 0x00ffff,
+        transparent: true,
+        opacity: 0.7,
+        roughness: 0.1,
+        metalness: 0.9
+      });
+      const dome = new THREE.Mesh(domeGeo, glassMat);
+      dome.rotation.z = -Math.PI / 2; // 朝向前進方向 (+X)
+      dome.position.x = 1.0;
+      player.add(dome);
+
+      // 3. 螺旋槳與尾翼 (灰色小尾舵)
+      const finGeo = new THREE.BoxGeometry(0.2, 0.8, 0.1);
+      const darkMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+      const rudder = new THREE.Mesh(finGeo, darkMat);
+      rudder.position.x = -1.1;
+      player.add(rudder);
+
+      // 4. 強力探照燈 (前置 Spotlight - 增加夜晚深海探險感！)
+      const headlight = new THREE.SpotLight(0xffffff, 8, 15, Math.PI / 5, 0.5, 1);
+      headlight.position.set(1.1, 0, 0);
+      headlight.target.position.set(5, 0, 0);
+      player.add(headlight);
+      player.add(headlight.target); // 必須將 target 加入 Group 以保持隨潛艇移動
+
+      // 設定初始高度在海床上空約 0.6 處
+      player.position.set(0, 0.6, 0);
+      scene.add(player);
+    }
+
+    // 建立崎嶇崎嶇的天然海床
+    function buildSeabed() {
+      // 建立地平面網格
+      const wSize = GAME_CONFIG.worldSize * 2.4;
+      const segments = 40;
+      const seabedGeo = new THREE.PlaneGeometry(wSize, wSize, segments, segments);
+      
+      // 擾動頂點以製造礁石凹凸與地形高低起伏
+      const pos = seabedGeo.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        const vx = pos.getX(i);
+        const vy = pos.getY(i); // 平面在 xy 軸，旋轉後會變成 xz
+        
+        // 疊加簡單的正弦波噪音，創造自然礁岩感
+        const height = Math.sin(vx * 0.15) * Math.cos(vy * 0.15) * 0.8 + 
+                       Math.sin(vx * 0.05) * Math.cos(vy * 0.05) * 1.5;
+        pos.setZ(i, height); // 把高度套用到 Z (旋轉後會映射到 Y)
+      }
+      
+      seabedGeo.computeVertexNormals();
+
+      // 深海暗沙泥材質
+      const seabedMat = new THREE.MeshStandardMaterial({
+        color: 0x22352a,       // 深綠灰
+        roughness: 0.95,       // 非常粗糙不反光
+        metalness: 0.05,
+        flatShading: true       // 呈現多面體低多邊形礁石感
+      });
+
+      const seabed = new THREE.Mesh(seabedGeo, seabedMat);
+      // 將平面旋轉到水平面
+      seabed.rotation.x = -Math.PI / 2;
+      seabed.position.y = 0;
+      seabed.receiveShadow = true;
+      scene.add(seabed);
+
+      // 海床邊界擋牆 (防止玩家衝過頭)
+      const borderGeo = new THREE.RingGeometry(GAME_CONFIG.worldSize, GAME_CONFIG.worldSize + 2, 32);
+      const borderMat = new THREE.MeshBasicMaterial({ color: 0x0f2027, side: THREE.DoubleSide, transparent: true, opacity: 0.2 });
+      const border = new THREE.Mesh(borderGeo, borderMat);
+      border.rotation.x = -Math.PI / 2;
+      border.position.y = 0.1;
+      scene.add(border);
+    }
+
+    // 動態氣泡粒子系統 (模擬深海漂浮小氣泡)
+    function createBubbles() {
+      const bubbleGeo = new THREE.SphereGeometry(0.08, 6, 6);
+      const bubbleMat = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.4
+      });
+
+      // 隨機產生 60 個飄浮氣泡
+      for (let i = 0; i < 60; i++) {
+        const bubble = new THREE.Mesh(bubbleGeo, bubbleMat);
+        resetBubble(bubble);
+        // 亂數初始化其高度位置
+        bubble.position.y = Math.random() * 15;
+        scene.add(bubble);
+        bubbles.push(bubble);
+      }
+    }
+
+    function resetBubble(b) {
+      const range = GAME_CONFIG.worldSize;
+      b.position.x = (Math.random() - 0.5) * range * 1.8;
+      b.position.z = (Math.random() - 0.5) * range * 1.8;
+      b.position.y = -0.1;
+      // 隨機上升速度
+      b.userData = { speed: 0.03 + Math.random() * 0.05 };
+    }
+
+    /* =================================================================
+       5. 生態威脅與守護目標：珊瑚、消波水泥塊隨機生成
+       ================================================================= */
+
+    // 隨機產生天然扇形珊瑚 (珍貴寶物)
+    // 【模型替換註解】：未來更換為珊瑚 .gltf 模型時，請將本函式替換為 GLTFLoader 載入邏輯
+    function spawnCoral() {
+      const coralGroup = new THREE.Group();
+
+      // 我們利用粉紅色與紫色的多重半球體 (SphereGeometry)，來堆疊出精緻的「扇形珊瑚」
+      const size = 0.5 + Math.random() * 0.3;
+      
+      // 主扇葉 (粉紅色，拍扁並立直)
+      const mainFanGeo = new THREE.SphereGeometry(size, 16, 12, 0, Math.PI * 2, 0, Math.PI / 2);
+      const pinkMat = new THREE.MeshStandardMaterial({
+        color: 0xff6b8b, // 海洋粉珊瑚紅
+        roughness: 0.8,
+        emissive: 0xff3b6b, // 讓珊瑚本身帶有一點點自發光
+        emissiveIntensity: 0.2
+      });
+      const mainFan = new THREE.Mesh(mainFanGeo, pinkMat);
+      mainFan.scale.set(1.2, 1.2, 0.3); // 擠壓成薄薄的扇狀
+      mainFan.rotation.x = Math.PI / 2; // 立起來
+      mainFan.castShadow = true;
+      coralGroup.add(mainFan);
+
+      // 側扇葉 (紫色，歪向一邊增加不規則美感)
+      const sideFanGeo = new THREE.SphereGeometry(size * 0.7, 12, 10, 0, Math.PI * 2, 0, Math.PI / 2);
+      const purpleMat = new THREE.MeshStandardMaterial({
+        color: 0x9b59b6, // 紫色珊瑚
+        roughness: 0.8,
+        emissive: 0x8e44ad,
+        emissiveIntensity: 0.2
+      });
+      const sideFan = new THREE.Mesh(sideFanGeo, purpleMat);
+      sideFan.scale.set(1.0, 1.0, 0.25);
+      sideFan.rotation.x = Math.PI / 2;
+      sideFan.rotation.z = Math.PI / 4; // 扭轉方向
+      sideFan.position.set(-size * 0.4, size * 0.2, 0);
+      sideFan.castShadow = true;
+      coralGroup.add(sideFan);
+
+      // 小亮點 (珊瑚蟲觸手亮片效果 - 動態發光點)
+      const glowGeo = new THREE.SphereGeometry(0.1, 4, 4);
+      const yellowMat = new THREE.MeshBasicMaterial({ color: 0xfffa65 });
+      const glowTip1 = new THREE.Mesh(glowGeo, yellowMat);
+      glowTip1.position.set(size * 0.5, size * 0.8, 0.1);
+      const glowTip2 = new THREE.Mesh(glowGeo, yellowMat);
+      glowTip2.position.set(-size * 0.5, size * 0.8, -0.1);
+      coralGroup.add(glowTip1, glowTip2);
+
+      // 隨機擺在海床上
+      let validPos = false;
+      let rx, rz;
+      // 確保不生成在太靠近中心起點的位置
+      while (!validPos) {
+        rx = (Math.random() - 0.5) * (GAME_CONFIG.worldSize * 1.6);
+        rz = (Math.random() - 0.5) * (GAME_CONFIG.worldSize * 1.6);
+        if (Math.sqrt(rx*rx + rz*rz) > 3) {
+          validPos = true;
+        }
+      }
+      
+      coralGroup.position.set(rx, 0.1, rz);
+      
+      // 隨機旋轉
+      coralGroup.rotation.y = Math.random() * Math.PI * 2;
+      scene.add(coralGroup);
+      
+      corals.push(coralGroup);
+    }
+
+    // 隨機從天而降的水泥消波塊 (敵方障礙物)
+    // 【模型替換註解】：未來更換為消波塊 .gltf 模型時，請將本函式替換為 GLTFLoader 載入邏輯
+    function spawnCementBlock() {
+      if (gameState !== 'PLAYING') return;
+
+      const group = new THREE.Group();
+
+      // 藉由疊加兩個交叉的水泥灰方塊，模擬重型水泥阻礙構造
+      const cementMat = new THREE.MeshStandardMaterial({
+        color: 0x7f8c8d, // 粗糙水泥灰
+        roughness: 0.9,
+        metalness: 0.2
+      });
+
+      // 主方塊
+      const baseGeo = new THREE.BoxGeometry(1.6, 1.6, 1.6);
+      const baseMesh = new THREE.Mesh(baseGeo, cementMat);
+      baseMesh.castShadow = true;
+      baseMesh.receiveShadow = true;
+      group.add(baseMesh);
+
+      // 交叉次方塊，凸顯「消波塊/水泥塊」不規則幾何形體
+      const crossGeo = new THREE.BoxGeometry(1.0, 2.2, 1.0);
+      const crossMesh = new THREE.Mesh(crossGeo, cementMat);
+      crossMesh.rotation.x = Math.PI / 4;
+      crossMesh.rotation.z = Math.PI / 4;
+      crossMesh.castShadow = true;
+      crossMesh.receiveShadow = true;
+      group.add(crossMesh);
+
+      // 水泥塊隨機誕生於高空中 (Y=18)，範圍覆蓋整個遊玩區域
+      const range = GAME_CONFIG.worldSize * 1.7;
+      const rx = (Math.random() - 0.5) * range;
+      const rz = (Math.random() - 0.5) * range;
+      
+      group.position.set(rx, 18, rz);
+      scene.add(group);
+
+      // userData 用來儲存此物件在遊戲更新中的即時狀態
+      group.userData = {
+        state: 'FALLING',            // FALLING: 落下中, SETTLED: 已固定在海床
+        fallSpeed: 0.12 + Math.random() * 0.1, // 隨機掉落速度
+        size: 1.6                     // 用於碰撞判定半徑
+      };
+
+      cementBlocks.push(group);
+    }
+
+    /* =================================================================
+       6. 玩家控制與自適應操作機制 (鍵盤 & 虛擬搖桿)
+       ================================================================= */
+    
+    // 初始化事件監聽
+    function setupControls() {
+      // 鍵盤按下與放開事件
+      window.addEventListener('keydown', (e) => {
+        keysPressed[e.key.toLowerCase()] = true;
+      });
+      window.addEventListener('keyup', (e) => {
+        keysPressed[e.key.toLowerCase()] = false;
+      });
+
+      // 手機板/平版虛擬搖桿操作邏輯
+      const joystickZone = document.getElementById('joystick-zone');
+      const joystickKnob = document.getElementById('joystick-knob');
+
+      // 偵測是否為行動裝置
+      if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+        isMobile = true;
+        joystickZone.classList.remove('hidden'); // 行動端秀出搖桿
+      }
+
+      joystickZone.addEventListener('touchstart', (e) => {
+        initAudio(); // 音效解鎖
+        const touch = e.touches[0];
+        const rect = joystickZone.getBoundingClientRect();
+        touchStartPos = {
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2
+        };
+      });
+
+      joystickZone.addEventListener('touchmove', (e) => {
+        if (!touchStartPos) return;
+        const touch = e.touches[0];
+        
+        // 計算拖曳向量與距離
+        const dx = touch.clientX - touchStartPos.x;
+        const dy = touch.clientY - touchStartPos.y;
+        const distance = Math.sqrt(dx*dx + dy*dy);
+        
+        const maxLimit = 50; // 搖桿最大限制距離
+        let angle = Math.atan2(dy, dx);
+        
+        // 限制旋鈕在邊界內
+        let moveX = dx;
+        let moveY = dy;
+        if (distance > maxLimit) {
+          moveX = Math.cos(angle) * maxLimit;
+          moveY = Math.sin(angle) * maxLimit;
+        }
+
+        // 移動旋鈕 UI
+        joystickKnob.style.transform = `translate(${moveX}px, ${moveY}px)`;
+
+        // 標準化控制向量：X 對應 3D 空間的 X 軸，Y 對應 3D 空間的 Z 軸
+        touchMoveVector.x = moveX / maxLimit;
+        touchMoveVector.z = moveY / maxLimit;
+      });
+
+      joystickZone.addEventListener('touchend', () => {
+        // 重置搖桿位置與控制向量
+        joystickKnob.style.transform = 'translate(0px, 0px)';
+        touchMoveVector = { x: 0, z: 0 };
+        touchStartPos = null;
+      });
+
+      // 視窗大小適應調整
+      window.addEventListener('resize', onWindowResize);
+    }
+
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    /* =================================================================
+       7. 物理碰撞與核心遊戲迴圈
+       ================================================================= */
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      // 動態更新氣泡上升
+      bubbles.forEach(b => {
+        b.position.y += b.userData.speed;
+        // 微幅飄動
+        b.position.x += Math.sin(b.position.y * 2) * 0.01;
+        // 超過高度則重置到底部
+        if (b.position.y > 18) {
+          resetBubble(b);
+        }
+      });
+
+      if (gameState === 'PLAYING') {
+        // 更新玩家潛水艇位置與方向
+        updatePlayerMovement();
+
+        // 更新水泥方塊物理行為 (下降與著陸)
+        updateCementBlocks();
+
+        // 偵測珊瑚收集
+        checkCoralCollections();
+      }
+
+      // 渲染畫面
+      renderer.render(scene, camera);
+    }
+
+    // 處理潛艇移動與碰撞阻擋
+    function updatePlayerMovement() {
+      if (!player) return;
+
+      let moveX = 0;
+      let moveZ = 0;
+
+      // A. 處理鍵盤控制
+      if (keysPressed['w'] || keysPressed['arrowup']) moveZ -= GAME_CONFIG.submarineSpeed;
+      if (keysPressed['s'] || keysPressed['arrowdown']) moveZ += GAME_CONFIG.submarineSpeed;
+      if (keysPressed['a'] || keysPressed['arrowleft']) moveX -= GAME_CONFIG.submarineSpeed;
+      if (keysPressed['d'] || keysPressed['arrowright']) moveX += GAME_CONFIG.submarineSpeed;
+
+      // B. 處理觸控搖桿控制 (若有觸碰輸入)
+      if (isMobile && (Math.abs(touchMoveVector.x) > 0.05 || Math.abs(touchMoveVector.z) > 0.05)) {
+        moveX = touchMoveVector.x * GAME_CONFIG.submarineSpeed;
+        moveZ = touchMoveVector.z * GAME_CONFIG.submarineSpeed;
+      }
+
+      // 計算潛艇下一個預期位置
+      const nextX = player.position.x + moveX;
+      const nextZ = player.position.z + moveZ;
+
+      // 1. 地圖邊界碰撞判定 (圓形海床限制)
+      const distFromCenter = Math.sqrt(nextX * nextX + nextZ * nextZ);
+      if (distFromCenter < GAME_CONFIG.worldSize) {
+        
+        // 2. 水泥固體障礙物阻擋判定
+        let collisionBlocked = false;
+        for (let block of cementBlocks) {
+          if (block.userData.state === 'SETTLED') {
+            const dx = nextX - block.position.x;
+            const dz = nextZ - block.position.z;
+            const dist = Math.sqrt(dx*dx + dz*dz);
+            // 潛艇碰撞半徑約 0.7，水泥塊半徑約 0.85
+            if (dist < 1.55) {
+              collisionBlocked = true;
+              break;
+            }
+          }
+        }
+
+        // 若無硬體碰撞，則確認移動並更新艇身面向
+        if (!collisionBlocked) {
+          player.position.x = nextX;
+          player.position.z = nextZ;
+
+          // 若有移動，則讓潛艇頭部旋轉指向前進方向
+          if (Math.abs(moveX) > 0.01 || Math.abs(moveZ) > 0.01) {
+            // 利用 atan2 計算前進偏向角
+            const targetRotationY = Math.atan2(-moveZ, moveX);
+            // 平滑插值轉向，避免瞬間閃變
+            player.rotation.y = THREE.MathUtils.lerp(player.rotation.y, targetRotationY, 0.25);
+          }
+        }
+      }
+    }
+
+    // 處理水泥消波塊掉落與砸中玩家的傷害判定
+    function updateCementBlocks() {
+      for (let i = cementBlocks.length - 1; i >= 0; i--) {
+        const block = cementBlocks[i];
+
+        if (block.userData.state === 'FALLING') {
+          // 下降
+          block.position.y -= block.userData.fallSpeed;
+          // 自轉 (營造落下的翻滾立體感)
+          block.rotation.x += 0.01;
+          block.rotation.y += 0.01;
+
+          // A. 判定是否砸中玩家潛艇
+          const distToPlayer = block.position.distanceTo(player.position);
+          if (distToPlayer < 1.4) {
+            // 物理砸中 -> 遊戲結束
+            playCrashSound();
+            endGame(false);
+            return;
+          }
+
+          // B. 判定是否接觸海床 (著陸，海床 Y=0，方塊自身高度一半 Y=0.8)
+          if (block.position.y <= 0.8) {
+            block.position.y = 0.8;
+            block.userData.state = 'SETTLED';
+            block.rotation.set(0, Math.random() * Math.PI, 0); // 固定旋轉角度
+            
+            // 著陸後微調材質顏色(變成灰暗，表示灌漿凝固)
+            block.children.forEach(mesh => {
+              if (mesh.material) {
+                mesh.material = new THREE.MeshStandardMaterial({
+                  color: 0x4f5d60,
+                  roughness: 1.0,
+                  metalness: 0.1
+                });
+              }
+            });
+
+            // 觸發海水波浪小震動音效
+            if (audioCtx) {
+              const pulse = audioCtx.createOscillator();
+              const gain = audioCtx.createGain();
+              pulse.connect(gain);
+              gain.connect(audioCtx.destination);
+              pulse.type = 'triangle';
+              pulse.frequency.setValueAtTime(80, audioCtx.currentTime);
+              gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+              gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.1);
+              pulse.start();
+              pulse.stop(audioCtx.currentTime + 0.1);
+            }
+          }
+        }
+      }
+    }
+
+    // 偵測收集珊瑚
+    function checkCoralCollections() {
+      for (let i = corals.length - 1; i >= 0; i--) {
+        const coral = corals[i];
+        
+        // 算出潛艇與珊瑚在 XZ 二維平面上的距離
+        const dx = player.position.x - coral.position.x;
+        const dz = player.position.z - coral.position.z;
+        const dist = Math.sqrt(dx*dx + dz*dz);
+
+        // 碰觸半徑判斷 (潛艇接近珊瑚時直接撈起)
+        if (dist < 1.3) {
+          playCollectSound();
+          
+          // 從場景與清單中拔除
+          scene.remove(coral);
+          corals.splice(i, 1);
+
+          // 累加分數
+          score++;
+          document.getElementById('hud-score').innerText = score;
+
+          // 補充新的一株珊瑚，保持海上有充足珊瑚供搶救
+          spawnCoral();
+
+          // 勝利條件檢查
+          if (score >= GAME_CONFIG.coralGoal) {
+            endGame(true);
+          }
+          break;
+        }
+      }
+    }
+
+    /* =================================================================
+       8. 遊戲控制、計時器、勝負判定邏輯
+       ================================================================= */
+
+    // 開始新局
+    function startGame() {
+      initAudio(); // 玩家點擊時解鎖聲音
+      
+      gameState = 'PLAYING';
+      score = 0;
+      timeLeft = GAME_CONFIG.totalTime;
+
+      // UI 更新
+      document.getElementById('start-screen').classList.add('hidden');
+      document.getElementById('end-screen').classList.add('hidden');
+      document.getElementById('hud').classList.remove('hidden');
+      document.getElementById('hud-score').innerText = '0';
+      document.getElementById('hud-timer').innerText = timeLeft + 's';
+
+      // 清除舊物體
+      corals.forEach(c => scene.remove(c));
+      cementBlocks.forEach(b => scene.remove(b));
+      corals = [];
+      cementBlocks = [];
+
+      // 建立玩家潛水艇
+      buildPlayer();
+
+      // 初始化鋪設多株天然珊瑚
+      for (let i = 0; i < GAME_CONFIG.maxCorals; i++) {
+        spawnCoral();
+      }
+
+      // 啟動定時倒數計時
+      if (gameTimerInterval) clearInterval(gameTimerInterval);
+      gameTimerInterval = setInterval(() => {
+        timeLeft--;
+        document.getElementById('hud-timer').innerText = timeLeft + 's';
+
+        // 警報聲效提醒 (當時間低於 10 秒)
+        if (timeLeft <= 10 && timeLeft > 0) {
+          document.getElementById('timer-box').classList.add('bg-red-500/40');
+          if (audioCtx) {
+            const warningBeep = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            warningBeep.connect(gain);
+            gain.connect(audioCtx.destination);
+            warningBeep.type = 'sine';
+            warningBeep.frequency.setValueAtTime(800, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.1);
+            warningBeep.start();
+            warningBeep.stop(audioCtx.currentTime + 0.1);
+          }
+        } else {
+          document.getElementById('timer-box').classList.remove('bg-red-500/40');
+        }
+
+        // 時間到判定
+        if (timeLeft <= 0) {
+          endGame(score >= GAME_CONFIG.coralGoal);
+        }
+
+        // 定期自動播放潛水艇聲納音，加強沉浸體驗
+        if (timeLeft % 4 === 0) {
+          playSonarSound();
+        }
+      }, 1000);
+
+      // 啟動消波塊/建材掉落生成器 (難度隨時間加深)
+      if (cementSpawnInterval) clearInterval(cementSpawnInterval);
+      cementSpawnInterval = setInterval(() => {
+        // 隨著時間減少，消波塊掉落頻率變快！
+        spawnCementBlock();
+        if (timeLeft < 30) {
+          // 下半場隨機多砸一顆
+          setTimeout(spawnCementBlock, 400);
+        }
+      }, GAME_CONFIG.cementSpawnRate);
+    }
+
+    // 遊戲結算
+    function endGame(isWin) {
+      gameState = 'GAME_OVER';
+      clearInterval(gameTimerInterval);
+      clearInterval(cementSpawnInterval);
+
+      // 停止按鍵紀錄
+      Object.keys(keysPressed).forEach(k => keysPressed[k] = false);
+
+      // UI 顯示
+      document.getElementById('hud').classList.add('hidden');
+      const endScreen = document.getElementById('end-screen');
+      const endIcon = document.getElementById('end-icon');
+      const endTitle = document.getElementById('end-title');
+      const endMessage = document.getElementById('end-message');
+      const endScoreSpan = document.getElementById('end-score');
+
+      endScreen.classList.remove('hidden');
+      endScoreSpan.innerText = `${score} 株珊瑚`;
+
+      // 撥放結算背景音效
+      if (isWin) {
+        endIcon.innerText = '🪸✨';
+        endTitle.innerText = '搶救成功！';
+        endTitle.className = "text-3xl font-black mb-4 text-green-400";
+        endMessage.innerHTML = "<b>你成功在大撤退工程前救出了 20 株天然珊瑚！</b><br>在海底強光的照耀下，牠們將在人工培育中心繁衍。然而，外木山海岸填海造陸的爭議仍有賴全民持續關注與發聲，讓生態與工業共存！";
+        
+        // 播放凱旋音效 (大和弦)
+        if (audioCtx) {
+          const osc1 = audioCtx.createOscillator();
+          const osc2 = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc1.connect(gain); osc2.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc1.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+          osc2.frequency.setValueAtTime(659.25, audioCtx.currentTime); // E5
+          gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.2);
+          osc1.start(); osc2.start();
+          osc1.stop(audioCtx.currentTime + 1.2); osc2.stop(audioCtx.currentTime + 1.2);
+        }
+      } else {
+        endIcon.innerText = '🧱🥀';
+        endTitle.innerText = '外木山逐漸消逝...';
+        endTitle.className = "text-3xl font-black mb-4 text-red-500";
+        if (timeLeft <= 0) {
+          endMessage.innerHTML = "<b>時間到了！水泥灌漿已經完全覆蓋了珊瑚床。</b><br>雖然你努力在與時間賽跑，但大量消波塊已永遠奪走了海岸的生機。請重新整備，拯救更多生命！";
+        } else {
+          endMessage.innerHTML = "<b>砰！重型消波塊正面擊中潛艇！防護罩破裂，搶救任務被迫終止。</b><br>失去你的維護，海床上剩餘的珊瑚將被混擬土無情吞噬...請務必留意上方落下的灰色巨物！";
+        }
+
+        // 播放悲傷哀鳴音效 (遞減音階)
+        if (audioCtx) {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
+          osc.frequency.linearRampToValueAtTime(110, audioCtx.currentTime + 1.0); // A2
+          gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.0);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 1.0);
+        }
+      }
+    }
+
+    /* =================================================================
+       9. 遊戲主入口 (Initialization)
+       ================================================================= */
+    window.onload = function() {
+      // 1. 初始化 3D 引擎與場景
+      init3D();
+
+      // 2. 建立控制器
+      setupControls();
+
+      // 3. 按鈕事件綁定
+      document.getElementById('btn-start').addEventListener('click', () => {
+        startGame();
+      });
+
+      document.getElementById('btn-restart').addEventListener('click', () => {
+        startGame();
+      });
+
+      // 4. 啟動動畫繪製迴圈
+      animate();
+    };
+  </script>
+</body>
+</html>
