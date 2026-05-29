@@ -345,38 +345,81 @@
                 <!-- 小遊戲列表網格 (10個預設空間) -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6" id="game-grid">
                     
-                    <!-- Game 01 ~ 10 (使用 JavaScript 動態生成佔位符，保持 HTML 乾淨) -->
+                    <!-- 使用 JavaScript 動態生成卡片，方便後續更新 -->
                     <script>
                         const gameGrid = document.getElementById('game-grid');
+                        
+                        // 【小遊戲設定區】未來有新遊戲，只需在這裡新增一筆資料！
+                        const gamesData = [
+                            {
+                                teamNumber: "01",
+                                status: "completed", // 改為 completed 即可開放遊玩
+                                title: "搶救外木山：珊瑚大撤退",
+                                desc: "點擊上方圖示開始挑戰！幫助珊瑚從外木山的危機中安全撤退。",
+                                fileUrl: "05-AI小遊戲展示區/01-[北接]搶救外木山：珊瑚大撤退.html"
+                            }
+                            // 如果有第二組完成，請解除下方註解並修改內容：
+                            // ,{ teamNumber: "02", status: "completed", title: "遊戲標題", desc: "遊戲介紹...", fileUrl: "05-AI小遊戲展示區/檔名.html" }
+                        ];
+
+                        let gridHTML = '';
+
+                        // 補齊剩餘的空位到 10 組
                         for(let i=1; i<=10; i++) {
-                            let numStr = i < 10 ? '0' + i : i;
-                            gameGrid.innerHTML += `
-                            <div class="game-card bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl flex flex-col h-full border border-gray-100 dark:border-slate-700" data-category="pending">
-                                <div class="relative pb-[100%] overflow-hidden bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/40 dark:to-purple-900/40">
+                            let numStr = i < 10 ? '0' + i : String(i);
+                            let game = gamesData.find(g => g.teamNumber === numStr);
+                            
+                            // 如果沒有設定資料，顯示預設「開發中」
+                            if(!game) {
+                                game = {
+                                    status: "pending",
+                                    title: "等待上線中...",
+                                    desc: `第 ${i} 組的同學正在運用 AI 開發有趣的海洋小遊戲，敬請期待！`,
+                                    fileUrl: ""
+                                };
+                            }
+
+                            let isCompleted = game.status === "completed";
+                            let badgeClass = isCompleted ? "bg-green-500" : "bg-gray-500";
+                            let badgeText = isCompleted ? "開放遊玩" : "開發中";
+                            let bgGradient = isCompleted ? "from-indigo-500 to-purple-600" : "from-indigo-100 to-purple-100 dark:from-indigo-900/40 dark:to-purple-900/40";
+                            let iconColor = isCompleted ? "text-white/50" : "text-indigo-300 dark:text-indigo-800/50";
+                            let titleColor = isCompleted ? "text-indigo-500" : "text-indigo-400";
+                            
+                            // 播放遮罩 HTML
+                            let overlayHTML = isCompleted 
+                                ? `<div class="absolute inset-0 bg-slate-900/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 backdrop-blur-[2px] cursor-pointer play-btn" data-player-src="${game.fileUrl}">
+                                       <div class="bg-white text-indigo-600 rounded-full w-16 h-16 flex items-center justify-center transform hover:scale-110 transition-transform shadow-xl">
+                                           <i class="fas fa-play text-2xl ml-1"></i>
+                                       </div>
+                                   </div>`
+                                : `<div class="absolute inset-0 bg-slate-900/60 flex flex-col items-center justify-center opacity-0 play-overlay transition-opacity duration-300 backdrop-blur-sm cursor-not-allowed">
+                                       <i class="fas fa-code text-3xl text-white/80 mb-2"></i>
+                                       <span class="text-white font-medium text-sm">遊戲開發中...</span>
+                                   </div>`;
+
+                            gridHTML += `
+                            <div class="game-card bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl flex flex-col h-full border border-gray-100 dark:border-slate-700" data-category="${game.status}">
+                                <div class="relative pb-[100%] overflow-hidden bg-gradient-to-br ${bgGradient}">
                                     <div class="absolute inset-0 flex items-center justify-center cover-img">
-                                        <i class="fas fa-gamepad text-7xl text-indigo-300 dark:text-indigo-800/50"></i>
+                                        <i class="fas fa-gamepad text-7xl ${iconColor}"></i>
                                     </div>
-                                    <span class="absolute top-3 left-3 bg-gray-500 text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm">開發中</span>
+                                    <span class="absolute top-3 left-3 ${badgeClass} text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm">${badgeText}</span>
                                     
-                                    <!-- 播放遮罩 (預設狀態不顯示播放按鈕) -->
-                                    <div class="absolute inset-0 bg-slate-900/60 flex flex-col items-center justify-center opacity-0 play-overlay transition-opacity duration-300 backdrop-blur-sm cursor-not-allowed">
-                                        <i class="fas fa-code text-3xl text-white/80 mb-2"></i>
-                                        <span class="text-white font-medium text-sm">遊戲開發中...</span>
-                                    </div>
+                                    ${overlayHTML}
                                 </div>
                                 <div class="p-5 flex flex-col flex-grow border-t border-gray-50 dark:border-slate-700/50">
-                                    <div class="text-xs font-bold text-indigo-400 mb-1">Game Team ${numStr}</div>
-                                    <h3 class="text-lg font-bold mb-2 text-gray-800 dark:text-white line-clamp-1">等待上線中...</h3>
+                                    <div class="text-xs font-bold ${titleColor} mb-1">Game Team ${numStr}</div>
+                                    <h3 class="text-lg font-bold mb-2 text-gray-800 dark:text-white line-clamp-1">${game.title}</h3>
                                     <p class="text-gray-500 dark:text-gray-400 text-sm mb-4 line-clamp-2 flex-grow">
-                                        第 ${i} 組的同學正在運用 AI 開發有趣的海洋小遊戲，敬請期待！
+                                        ${game.desc}
                                     </p>
                                 </div>
                             </div>
                             `;
                         }
+                        gameGrid.innerHTML = gridHTML;
                     </script>
-                    
-                    <!-- 【教學】當小遊戲完成後，將 class 中的 pending 改為 completed，並加上 data-player-src="05-AI小遊戲展示區/xxx.html" 即可 -->
                 </div>
 
                 <div id="game-no-results" class="hidden py-16 text-center text-gray-500 dark:text-gray-400 bg-white dark:bg-slate-800/50 rounded-2xl border border-dashed border-gray-200 dark:border-slate-700 mt-6">
@@ -423,33 +466,78 @@
                 <!-- Podcast 列表網格 (10個預設空間) -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6" id="podcast-grid">
                     
-                    <!-- Podcast 01 ~ 10 -->
+                    <!-- Podcast 動態生成區 -->
                     <script>
                         const podcastGrid = document.getElementById('podcast-grid');
+                        
+                        // 【Podcast 設定區】未來有新 Podcast，只需在這裡新增資料！
+                        const podcastsData = [
+                            /* 範例格式：
+                            {
+                                teamNumber: "01",
+                                status: "completed",
+                                title: "海洋生態危機",
+                                desc: "探討氣候變遷對珊瑚礁的影響...",
+                                fileUrl: "04-Podcast成果展示/xxx.html"
+                            }
+                            */
+                        ];
+
+                        let podcastGridHTML = '';
+
                         for(let i=1; i<=10; i++) {
-                            let numStr = i < 10 ? '0' + i : i;
-                            podcastGrid.innerHTML += `
-                            <div class="podcast-card bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl flex flex-col h-full border border-gray-100 dark:border-slate-700" data-category="pending">
-                                <div class="relative pb-[100%] overflow-hidden bg-gradient-to-br from-slate-200 to-gray-300 dark:from-slate-700 dark:to-slate-800">
+                            let numStr = i < 10 ? '0' + i : String(i);
+                            let podcast = podcastsData.find(p => p.teamNumber === numStr);
+                            
+                            if(!podcast) {
+                                podcast = {
+                                    status: "pending",
+                                    title: "等待發布中...",
+                                    desc: `第 ${i} 組的同學正在努力製作他們的海洋 Podcast，敬請期待他們精彩的作品！`,
+                                    fileUrl: ""
+                                };
+                            }
+
+                            let isCompleted = podcast.status === "completed";
+                            let badgeClass = isCompleted ? "bg-green-500" : "bg-gray-500";
+                            let badgeText = isCompleted ? "已上架" : "製作中";
+                            
+                            // 背景與樣式
+                            let bgGradient = isCompleted ? "from-blue-500 to-cyan-500" : "from-slate-200 to-gray-300 dark:from-slate-700 dark:to-slate-800";
+                            let numberColor = isCompleted ? "text-white/30" : "text-white/40 dark:text-black/20";
+                            let titleColor = isCompleted ? "text-blue-500" : "text-gray-400";
+
+                            let overlayHTML = isCompleted 
+                                ? `<div class="absolute inset-0 bg-slate-900/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 backdrop-blur-[2px] cursor-pointer play-btn" data-player-src="${podcast.fileUrl}">
+                                       <div class="bg-white text-blue-600 rounded-full w-16 h-16 flex items-center justify-center transform hover:scale-110 transition-transform shadow-xl">
+                                           <i class="fas fa-play text-2xl ml-1"></i>
+                                       </div>
+                                   </div>`
+                                : `<div class="absolute inset-0 bg-slate-900/60 flex flex-col items-center justify-center opacity-0 play-overlay transition-opacity duration-300 backdrop-blur-sm cursor-not-allowed">
+                                       <i class="fas fa-tools text-3xl text-white/80 mb-2"></i>
+                                       <span class="text-white font-medium text-sm">尚未上傳檔案</span>
+                                   </div>`;
+
+                            podcastGridHTML += `
+                            <div class="podcast-card bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl flex flex-col h-full border border-gray-100 dark:border-slate-700" data-category="${podcast.status}">
+                                <div class="relative pb-[100%] overflow-hidden bg-gradient-to-br ${bgGradient}">
                                     <div class="absolute inset-0 flex items-center justify-center cover-img">
-                                        <span class="text-8xl font-black text-white/40 dark:text-black/20">${numStr}</span>
+                                        <span class="text-8xl font-black ${numberColor}">${numStr}</span>
                                     </div>
-                                    <span class="absolute top-3 left-3 bg-gray-500 text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm">製作中</span>
-                                    <div class="absolute inset-0 bg-slate-900/60 flex flex-col items-center justify-center opacity-0 play-overlay transition-opacity duration-300 backdrop-blur-sm cursor-not-allowed">
-                                        <i class="fas fa-tools text-3xl text-white/80 mb-2"></i>
-                                        <span class="text-white font-medium text-sm">尚未上傳檔案</span>
-                                    </div>
+                                    <span class="absolute top-3 left-3 ${badgeClass} text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm">${badgeText}</span>
+                                    ${overlayHTML}
                                 </div>
                                 <div class="p-5 flex flex-col flex-grow">
-                                    <div class="text-xs font-bold text-gray-400 mb-1">Group ${numStr}</div>
-                                    <h3 class="text-lg font-bold mb-2 text-gray-800 dark:text-white line-clamp-1">等待發布中...</h3>
+                                    <div class="text-xs font-bold ${titleColor} mb-1">Group ${numStr}</div>
+                                    <h3 class="text-lg font-bold mb-2 text-gray-800 dark:text-white line-clamp-1">${podcast.title}</h3>
                                     <p class="text-gray-500 dark:text-gray-400 text-sm mb-4 line-clamp-2 flex-grow">
-                                        第 ${i} 組的同學正在努力製作他們的海洋 Podcast，敬請期待他們精彩的作品！
+                                        ${podcast.desc}
                                     </p>
                                 </div>
                             </div>
                             `;
                         }
+                        podcastGrid.innerHTML = podcastGridHTML;
                     </script>
                 </div>
 
