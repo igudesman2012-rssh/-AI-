@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { font-family: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif; background-color: #f8f6f0; color: #333; }
-        /* 移除固定高度，改由 Tailwind 的 aspect-video 控制比例 */
         .scene-container { position: relative; width: 100%; background: linear-gradient(to bottom, #dbeafe 0%, #bfdbfe 100%); border-radius: 0.5rem; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
         
         .hotspot { position: absolute; cursor: grab; transition: transform 0.2s, box-shadow 0.2s; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: bold; user-select: none; z-index: 20; }
@@ -115,7 +114,7 @@
                 <span class="font-bold text-lg text-[#1abc9c]"><i class="fas fa-gamepad mr-2"></i>暖身：連連看</span>
                 <span class="text-xs text-gray-400 mt-1 truncate w-full">測驗你的能源地理知識</span>
             </button>
-            </div>
+        </div>
         <div class="mt-auto p-4 hidden md:block">
             <div class="bg-gray-800 p-4 rounded text-sm text-gray-300">
                 <i class="fas fa-info-circle text-[#16a085] mb-2 text-lg"></i>
@@ -170,7 +169,7 @@
                     <div class="bg-white rounded-xl shadow-md overflow-hidden">
                         <div class="p-4 bg-gray-50 border-b border-gray-100 flex justify-between items-center relative z-20">
                             <h4 class="font-bold text-gray-700"><i class="fas fa-map-marked-alt mr-2 text-[#e67e22]"></i>環境與爭議互動圖解</h4>
-                            <span class="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded">點擊圖示查看詳情，滑動查看不同場景</span>
+                            <span class="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded">可直接拖曳圖示校正位置，並查看新座標</span>
                         </div>
                         
                         <div class="scene-container relative carousel-container aspect-video" id="scene-container">
@@ -183,7 +182,7 @@
                             <div id="interactive-scene" class="hotspot-container"></div>
                         </div>
                         
-                        <div id="hotspot-detail" class="p-4 bg-[#2c3e50] text-white hidden relative z-20">
+                        <div id="hotspot-detail" class="p-4 bg-[#2c3e50] text-white hidden relative z-20 transition-all">
                             <h5 id="hotspot-title" class="font-bold text-lg text-[#16a085] mb-1"></h5>
                             <p id="hotspot-desc" class="text-sm text-gray-300"></p>
                         </div>
@@ -248,7 +247,6 @@
             north: {
                 id: 'north', title: '台灣北部', subtitle: '基隆協和電廠燃氣改建案 (四接)', energyType: '燃氣發電 (LNG)',
                 intro: '本區段探討基隆外木山海岸的重大能源轉型計畫。為配合國家減碳政策，協和電廠擬將高污染的燃油機組改建為燃氣機組，並計畫填海造陸興建第四天然氣接收站（四接）。此舉引發了穩定北台灣供電、保護珍貴珊瑚礁生態以及維持當地漁民生計之間的強烈衝突，成為近年台灣最受矚目的環境運動之一。',
-                // 修改處：將陣列改為包含樣式設定的物件
                 sceneBgs: [
                     { url: 'url("https://raw.githubusercontent.com/igudesman2012-rssh/-AI-/main/01-圖片/01-北部基隆協和電廠可用圖片/01-協和電廠四接(填海造陸)預定範圍.jpg")', size: 'cover' },
                     { url: 'url("https://raw.githubusercontent.com/igudesman2012-rssh/-AI-/main/01-圖片/01-北部基隆協和電廠可用圖片/05-外木山海岸從外木山漁港連接另一頭是大武崙漁港，構成基隆人的海岸文化。（攝影林吉洋）.jpg")', size: 'cover' }
@@ -272,7 +270,6 @@
             central: {
                 id: 'central', title: '台灣中部', subtitle: '彰濱離岸風電 vs 白海豚棲地', energyType: '離岸風力發電',
                 intro: '台灣中部的彰化外海擁有世界級的優良風場，是政府推動離岸風電的重鎮。然而，風場開發區域與瀕臨絕種的「台灣白海豚」重要棲息地高度重疊，且大面積的海域佔用與施工嚴重衝擊彰化沿海的傳統漁業。此區域展現了綠色能源發展與本土特有種保育、傳統產業間的巨大摩擦。',
-                // 修改處
                 sceneBgs: [
                     { url: 'url("https://raw.githubusercontent.com/igudesman2012-rssh/-AI-/main/01-圖片/02-中部彰濱離岸風電可用圖片/03-風電預定地、白海豚棲地、漁民捕魚區.jpg")', size: 'cover' },
                     { url: 'url("https://raw.githubusercontent.com/igudesman2012-rssh/-AI-/main/01-圖片/02-中部彰濱離岸風電可用圖片/05-離岸風電機.jpg")', size: 'cover' }
@@ -295,7 +292,6 @@
             south: {
                 id: 'south', title: '台灣南部', subtitle: '嘉南漁電共生 vs 漁民權益與生態', energyType: '太陽能光電',
                 intro: '嘉義與台南沿海擁有廣大漁塭，成為政府推動「漁電共生」熱區。政策本意是「養殖為主、綠能為輔」，讓土地雙重利用。然而，龐大光電利益導致地主大幅調漲租金或拒租給原承租漁民，引發「假養殖、真種電」爭議，同時也威脅到在此覓食的黑面琵鷺等候鳥生態。',
-                // 修改處
                 sceneBgs: [
                     { url: 'url("https://raw.githubusercontent.com/igudesman2012-rssh/-AI-/main/01-圖片/03-南部嘉南魚電共生可用圖片/12-嘉義布袋國家重要濕地、風景區與太陽能發電開發區之重疊關係圖_來源-台灣黑面琵鷺保育學會.jpg")', size: 'cover' },
                     { url: 'url("https://raw.githubusercontent.com/igudesman2012-rssh/-AI-/main/01-圖片/03-南部嘉南魚電共生可用圖片/04-太陽能板類型.png")', size: 'cover' }
@@ -318,7 +314,6 @@
             east: {
                 id: 'east', title: '台灣東部', subtitle: '花蓮和平海洋溫差發電 vs 破壞', energyType: '海洋溫差發電',
                 intro: '台灣東部海岸地形陡峭，具備表層溫海與深層冷海的顯著溫差，是發展「海洋溫差發電」絕佳潛力區。近期在花蓮和平電廠推動相關計畫。這項零碳排終極綠能，在佈放巨型深水管線及大規模抽取、排放海水時，仍面臨對局部海洋環境未知衝擊的疑慮。',
-                // 修改處：將東部的特殊樣式直接包裝在資料裡
                 sceneBgs: [
                     { 
                         url: 'url("https://raw.githubusercontent.com/igudesman2012-rssh/-AI-/main/01-%E5%9C%96%E7%89%87/04-%E6%9D%B1%E9%83%A8%E8%8A%B1%E8%93%AE%E5%92%8C%E5%B9%B3%E9%9B%BB%E5%BB%A0%E6%BA%AB%E5%B7%AE%E7%99%BC%E9%9B%BB/06-%E6%B5%B7%E5%BA%95%E6%8A%BD%E6%B7%B1%E6%B5%B7%E5%86%B7%E6%B0%B4%E7%AE%A1%E7%B7%9A%E6%9E%B6%E8%A8%AD.png")', 
@@ -588,7 +583,6 @@
             currentCarouselIndex = 0;
 
             if (currentRegionData && currentRegionData.sceneBgs && currentRegionData.sceneBgs.length > 0) {
-                // 修改處：根據新的物件結構提取資料，避免寫死條件
                 currentRegionData.sceneBgs.forEach((bgData, index) => {
                     const imgDiv = document.createElement('div');
                     imgDiv.className = 'carousel-img';
@@ -670,15 +664,88 @@
                 spotEl.style.transform = 'translate(-50%, -50%)';
                 spotEl.innerHTML = `<i class="fas ${spot.icon}"></i><span class="absolute -bottom-6 w-max text-xs font-bold text-gray-800 bg-white/80 px-1 rounded shadow-sm pointer-events-none">${spot.title}</span>`;
                 
+                // --- 拖曳校正功能 ---
+                let isDragging = false;
+                let hasMoved = false;
+                let startX, startY, initialLeft, initialTop;
+
+                const startDrag = (e) => {
+                    isDragging = true;
+                    hasMoved = false;
+                    spotEl.style.cursor = 'grabbing';
+                    spotEl.style.zIndex = '50';
+                    const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+                    const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+                    startX = clientX;
+                    startY = clientY;
+                    initialLeft = parseFloat(spotEl.style.left) || 0;
+                    initialTop = parseFloat(spotEl.style.top) || 0;
+                    e.stopPropagation();
+                };
+
+                const doDrag = (e) => {
+                    if (!isDragging) return;
+                    const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+                    const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+                    const dx = clientX - startX;
+                    const dy = clientY - startY;
+
+                    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+                        hasMoved = true;
+                        e.preventDefault(); 
+                    }
+
+                    if (hasMoved) {
+                        const parentRect = scene.getBoundingClientRect();
+                        const percentX = (dx / parentRect.width) * 100;
+                        const percentY = (dy / parentRect.height) * 100;
+
+                        spotEl.style.left = `${(initialLeft + percentX).toFixed(1)}%`;
+                        spotEl.style.top = `${(initialTop + percentY).toFixed(1)}%`;
+                    }
+                };
+
+                const stopDrag = (e) => {
+                    if (!isDragging) return;
+                    isDragging = false;
+                    spotEl.style.cursor = 'grab';
+                    spotEl.style.zIndex = '';
+                    
+                    if (hasMoved) {
+                        const finalX = spotEl.style.left;
+                        const finalY = spotEl.style.top;
+                        
+                        // 替換資訊面板為複製座標的提示
+                        document.getElementById('hotspot-title').innerHTML = `<i class="fas fa-tools mr-2"></i>座標校正完成`;
+                        document.getElementById('hotspot-desc').innerHTML = `請將 <b>${spot.title}</b> 更新為：<br><code class="bg-gray-800 text-green-400 px-3 py-2 rounded mt-2 inline-block font-mono">x: '${finalX}', y: '${finalY}'</code>`;
+                        panel.classList.remove('hidden');
+                        panel.classList.add('animate-[fadeIn_0.2s_ease-in-out]');
+                    } else {
+                        // 單純點擊，恢復原有的資訊顯示
+                        showDetail(e);
+                    }
+                };
+
+                spotEl.addEventListener('mousedown', startDrag);
+                document.addEventListener('mousemove', doDrag);
+                document.addEventListener('mouseup', stopDrag);
+
+                spotEl.addEventListener('touchstart', startDrag, {passive: false});
+                document.addEventListener('touchmove', doDrag, {passive: false});
+                document.addEventListener('touchend', stopDrag);
+                // ---------------------------
+
                 const showDetail = (e) => {
+                    if (isDragging) return; 
                     document.getElementById('hotspot-title').innerHTML = `<i class="fas ${spot.icon} mr-2"></i>${spot.title}`;
                     document.getElementById('hotspot-desc').textContent = spot.desc;
                     panel.classList.remove('hidden');
                     panel.classList.add('animate-[fadeIn_0.2s_ease-in-out]');
                     if(e) e.stopPropagation(); 
                 };
+                
+                // 保留 hover 功能顯示基礎資訊
                 spotEl.addEventListener('mouseenter', showDetail);
-                spotEl.addEventListener('click', showDetail);
 
                 scene.appendChild(spotEl);
             });
