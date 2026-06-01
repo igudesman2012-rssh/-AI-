@@ -10,8 +10,7 @@
         body { font-family: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif; background-color: #f8f6f0; color: #333; }
         .scene-container { position: relative; width: 100%; background: linear-gradient(to bottom, #dbeafe 0%, #bfdbfe 100%); border-radius: 0.5rem; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
         
-        .hotspot { position: absolute; cursor: grab; transition: transform 0.2s, box-shadow 0.2s; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: bold; user-select: none; z-index: 20; }
-        .hotspot:active { cursor: grabbing; transition: none; }
+        .hotspot { position: absolute; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: bold; user-select: none; z-index: 20; }
         .hotspot:hover { transform: scale(1.1); box-shadow: 0 4px 6px rgba(0,0,0,0.2); z-index: 30; }
         .hotspot-pulse { animation: pulse 2s infinite; }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(22, 160, 133, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(22, 160, 133, 0); } 100% { box-shadow: 0 0 0 0 rgba(22, 160, 133, 0); } }
@@ -125,6 +124,7 @@
 
     <main class="flex-1 flex flex-col h-screen overflow-hidden bg-[#f8f6f0] relative">
         
+        <!-- Game View -->
         <div id="game-view" class="absolute inset-0 flex flex-col items-center pt-10 md:pt-20 px-4 overflow-y-auto bg-slate-50 z-10">
             <div class="text-center mb-10 max-w-2xl">
                 <h2 class="text-4xl font-bold text-[#2c3e50] mb-3">能源知多少？</h2>
@@ -149,6 +149,7 @@
             </div>
         </div>
 
+        <!-- Dashboard Content View -->
         <div id="dashboard-view" class="hidden flex-1 flex-col h-full">
             <header class="bg-white shadow-sm p-6 flex flex-col md:flex-row justify-between items-start md:items-center z-10 shrink-0">
                 <div>
@@ -166,19 +167,23 @@
                         <p id="intro-paragraph" class="text-gray-700 leading-relaxed text-lg"></p>
                     </div>
 
+                    <!-- Interactive Scene with Carousel -->
                     <div class="bg-white rounded-xl shadow-md overflow-hidden">
                         <div class="p-4 bg-gray-50 border-b border-gray-100 flex justify-between items-center relative z-20">
                             <h4 class="font-bold text-gray-700"><i class="fas fa-map-marked-alt mr-2 text-[#e67e22]"></i>環境與爭議互動圖解</h4>
-                            <span class="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded">可直接拖曳圖示校正位置，並查看新座標</span>
+                            <span class="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded">點擊圖示查看詳情，滑動查看不同場景</span>
                         </div>
                         
                         <div class="scene-container relative carousel-container aspect-video" id="scene-container">
+                            <!-- Image Carousel Container -->
                             <div id="carousel-images" class="carousel-images absolute inset-0 z-0"></div>
                             
+                            <!-- Carousel Controls -->
                             <button id="carousel-prev" class="carousel-btn carousel-btn-prev hidden !z-40"><i class="fas fa-chevron-left"></i></button>
                             <button id="carousel-next" class="carousel-btn carousel-btn-next hidden !z-40"><i class="fas fa-chevron-right"></i></button>
                             <div id="carousel-indicators" class="carousel-indicators hidden !z-40"></div>
 
+                            <!-- Hotspots Container -->
                             <div id="interactive-scene" class="hotspot-container"></div>
                         </div>
                         
@@ -252,10 +257,10 @@
                     { url: 'url("https://raw.githubusercontent.com/igudesman2012-rssh/-AI-/main/01-圖片/01-北部基隆協和電廠可用圖片/05-外木山海岸從外木山漁港連接另一頭是大武崙漁港，構成基隆人的海岸文化。（攝影林吉洋）.jpg")', size: 'cover' }
                 ],
                 hotspots: [
-                    { id: 'plant', x: '63%', y: '40%', icon: 'fa-industry', color: 'bg-gray-700 text-white', title: '協和電廠', desc: '現有燃油機組，計畫轉型為燃氣發電以減少空汙。' },
-                    { id: 'terminal', x: '21%', y: '32%', icon: 'fa-gas-pump', color: 'bg-red-500 text-white hotspot-pulse', title: '預定填海造陸區(四接)', desc: '計畫填埋海洋以建設天然氣接收站與儲槽，為主要爭議位置。' },
-                    { id: 'coral', x: '26%', y: '56%', icon: 'fa-disease', color: 'bg-pink-400 text-white', title: '外木山珊瑚礁', desc: '填海造陸將直接掩埋約7萬多株珊瑚，破壞海洋生態。' },
-                    { id: 'fish', x: '9%', y: '61%', icon: 'fa-ship', color: 'bg-amber-600 text-white', title: '基隆傳統漁場', desc: '填海與未來LNG船隻進出將限縮漁民作業空間，影響生計。' }
+                    { id: 'plant', x: '46.2%', y: '52.6%', icon: 'fa-industry', color: 'bg-gray-700 text-white', title: '協和電廠', desc: '現有燃油機組，計畫轉型為燃氣發電以減少空汙。' },
+                    { id: 'terminal', x: '18.7%', y: '36%', icon: 'fa-gas-pump', color: 'bg-red-500 text-white hotspot-pulse', title: '預定填海造陸區(四接)', desc: '計畫填埋海洋以建設天然氣接收站與儲槽，為主要爭議位置。' },
+                    { id: 'coral', x: '23.7%', y: '49.8%', icon: 'fa-disease', color: 'bg-pink-400 text-white', title: '外木山珊瑚礁', desc: '填海造陸將直接掩埋約7萬多株珊瑚，破壞海洋生態。' },
+                    { id: 'fish', x: '9.9%', y: '42.7%', icon: 'fa-ship', color: 'bg-amber-600 text-white', title: '基隆傳統漁場', desc: '填海與未來LNG船隻進出將限縮漁民作業空間，影響生計。' }
                 ],
                 history: `<p>協和發電廠是台灣唯一使用重油的發電廠，因設備老舊且污染較高，政府規劃將其除役，並於原址改建兩部燃氣複循環機組。</p><p>為供應新機組所需的天然氣，台電提出「協和發電廠更新改建計畫」，包含在外木山海岸填海造陸18.6公頃，興建「第四天然氣接收站」（簡稱四接）。</p><p>該計畫進入環境影響評估程序後，因填海造陸將永久摧毀當地海洋生態，遭到基隆在地居民與環保團體強烈抗議。經歷多次環評初審卡關，台電曾提出縮小填海面積的「東移方案」，至今爭議未解。</p>`,
                 species: ['外木山珊瑚礁群 (約7萬多株)', '多樣性底棲生物與熱帶魚類', '海龜覓食區'],
@@ -275,9 +280,9 @@
                     { url: 'url("https://raw.githubusercontent.com/igudesman2012-rssh/-AI-/main/01-圖片/02-中部彰濱離岸風電可用圖片/05-離岸風電機.jpg")', size: 'cover' }
                 ],
                 hotspots: [
-                    { id: 'windfarm', x: '33%', y: '19%', icon: 'fa-fan', color: 'bg-white text-blue-600 hotspot-pulse', title: '離岸風場預定/施工區', desc: '大規模設立風機，打樁噪音與震動對海洋生物造成嚴重影響。' },
-                    { id: 'dolphin', x: '39%', y: '74%', icon: 'fa-water', color: 'bg-blue-300 text-blue-900', title: '白海豚洄游廊道', desc: '極度瀕危的台灣特有亞種，風機基座與噪音威脅其生存空間。' },
-                    { id: 'fishing', x: '63%', y: '17%', icon: 'fa-anchor', color: 'bg-amber-700 text-white', title: '沿海傳統漁區', desc: '風場劃設航行限制區，漁網易遭海底電纜勾破，捕撈空間大幅縮減。' }
+                    { id: 'windfarm', x: '34.3%', y: '24.5%', icon: 'fa-fan', color: 'bg-white text-blue-600 hotspot-pulse', title: '離岸風場預定/施工區', desc: '大規模設立風機，打樁噪音與震動對海洋生物造成嚴重影響。' },
+                    { id: 'dolphin', x: '35.9%', y: '80.6%', icon: 'fa-water', color: 'bg-blue-300 text-blue-900', title: '白海豚洄游廊道', desc: '極度瀕危的台灣特有亞種，風機基座與噪音威脅其生存空間。' },
+                    { id: 'fishing', x: '62.5%', y: '20.5%', icon: 'fa-anchor', color: 'bg-amber-700 text-white', title: '沿海傳統漁區', desc: '風場劃設航行限制區，漁網易遭海底電纜勾破，捕撈空間大幅縮減。' }
                 ],
                 history: `<p>彰化外海被評定為全球最佳風場之一，吸引大量開發商進駐。然而，開發初期缺乏完善海洋空間規劃，導致風場位置與台灣白海豚棲息地、洄游廊道產生嚴重衝突。</p><p>海上施工（如打樁噪音）、海底電纜鋪設，以及營運後的禁漁規定，引發彰化漁民強烈抗爭，要求合理補償與生存權。政府隨後劃定白海豚重要棲息環境，並要求開發商遵守施工噪音規範。</p>`,
                 species: ['台灣白海豚 (數量極度瀕危)', '候鳥遷移路線', '多種沿岸經濟性魚類'],
@@ -313,7 +318,7 @@
             },
             east: {
                 id: 'east', title: '台灣東部', subtitle: '花蓮和平海洋溫差發電 vs 破壞', energyType: '海洋溫差發電',
-                intro: '台灣東部海岸地形陡峭，具備表層溫海與深層冷海的顯著溫差，是發展「海洋溫差發電」絕佳潛力區。近期在花蓮和平電廠推動相關計畫。這項零碳排終極綠能，在佈放巨型深水管線及大規模抽取、排放海水時，仍面臨對局部海洋環境未知衝擊的疑慮。',
+                intro: '台灣東部海岸地形陡峭，具備表層溫海與深層冷海的顯著溫差，是發展「海洋溫差發電」絕佳潛力區。近期在花蓮和平電廠推推動相關計畫。這項零碳排終極綠能，在佈放巨型深水管線及大規模抽取、排放海水時，仍面臨對局部海洋環境未知衝擊的疑慮。',
                 sceneBgs: [
                     { 
                         url: 'url("https://raw.githubusercontent.com/igudesman2012-rssh/-AI-/main/01-%E5%9C%96%E7%89%87/04-%E6%9D%B1%E9%83%A8%E8%8A%B1%E8%93%AE%E5%92%8C%E5%B9%B3%E9%9B%BB%E5%BB%A0%E6%BA%AB%E5%B7%AE%E7%99%BC%E9%9B%BB/06-%E6%B5%B7%E5%BA%95%E6%8A%BD%E6%B7%B1%E6%B5%B7%E5%86%B7%E6%B0%B4%E7%AE%A1%E7%B7%9A%E6%9E%B6%E8%A8%AD.png")', 
@@ -322,9 +327,9 @@
                     }
                 ],
                 hotspots: [
-                    { id: 'plant', x: '36%', y: '22%', icon: 'fa-building', color: 'bg-gray-400 text-gray-900', title: '溫差發電設施', desc: '利用溫差轉換熱能發電的陸上或近海設施。' },
-                    { id: 'discharge', x: '57%', y: '78%', icon: 'fa-water', color: 'bg-cyan-500 text-white', title: '低溫尾水排放區', desc: '排放大量低溫海水，可能改變水溫層影響表層生物。' },
-                    { id: 'pipe', x: '35%', y: '54%', icon: 'fa-ruler-horizontal', color: 'bg-blue-300 text-blue-800 hotspot-pulse', title: '深海抽水巨管', desc: '深入海平面下數百公尺，施工難度高恐破壞海床。' }
+                    { id: 'plant', x: '28.3%', y: '21.9%', icon: 'fa-building', color: 'bg-gray-400 text-gray-900', title: '溫差發電設施', desc: '利用溫差轉換熱能發電的陸上或近海設施。' },
+                    { id: 'discharge', x: '54.3%', y: '80.2%', icon: 'fa-water', color: 'bg-cyan-500 text-white', title: '低溫尾水排放區', desc: '排放大量低溫海水，可能改變水溫層影響表層生物。' },
+                    { id: 'pipe', x: '39.2%', y: '58.4%', icon: 'fa-ruler-horizontal', color: 'bg-blue-300 text-blue-800 hotspot-pulse', title: '深海抽水巨管', desc: '深入海平面下數百公尺，施工難度高恐破壞海床。' }
                 ],
                 history: `<p>海洋溫差發電利用表層溫水推動渦輪，再以深層冷水冷卻。因不具間歇性，被視為可作為基載電力的綠能。台灣東部黑潮加上陡峭海底地形具極佳條件。</p><p>近年台泥宣布在花蓮和平廠區推動計畫。但進入實質開發後，關於海管施工對珊瑚與底棲生態破壞，以及大規模冷水排放對表層漁業影響的討論浮現。</p>`,
                 species: ['珊瑚礁與底棲生物', '黑潮洄游性魚類 (如曼波魚)', '深海微小生物與浮游生物'],
@@ -664,79 +669,7 @@
                 spotEl.style.transform = 'translate(-50%, -50%)';
                 spotEl.innerHTML = `<i class="fas ${spot.icon}"></i><span class="absolute -bottom-6 w-max text-xs font-bold text-gray-800 bg-white/80 px-1 rounded shadow-sm pointer-events-none">${spot.title}</span>`;
                 
-                // --- 拖曳校正功能 ---
-                let isDragging = false;
-                let hasMoved = false;
-                let startX, startY, initialLeft, initialTop;
-
-                const startDrag = (e) => {
-                    isDragging = true;
-                    hasMoved = false;
-                    spotEl.style.cursor = 'grabbing';
-                    spotEl.style.zIndex = '50';
-                    const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-                    const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
-                    startX = clientX;
-                    startY = clientY;
-                    initialLeft = parseFloat(spotEl.style.left) || 0;
-                    initialTop = parseFloat(spotEl.style.top) || 0;
-                    e.stopPropagation();
-                };
-
-                const doDrag = (e) => {
-                    if (!isDragging) return;
-                    const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-                    const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
-                    const dx = clientX - startX;
-                    const dy = clientY - startY;
-
-                    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
-                        hasMoved = true;
-                        e.preventDefault(); 
-                    }
-
-                    if (hasMoved) {
-                        const parentRect = scene.getBoundingClientRect();
-                        const percentX = (dx / parentRect.width) * 100;
-                        const percentY = (dy / parentRect.height) * 100;
-
-                        spotEl.style.left = `${(initialLeft + percentX).toFixed(1)}%`;
-                        spotEl.style.top = `${(initialTop + percentY).toFixed(1)}%`;
-                    }
-                };
-
-                const stopDrag = (e) => {
-                    if (!isDragging) return;
-                    isDragging = false;
-                    spotEl.style.cursor = 'grab';
-                    spotEl.style.zIndex = '';
-                    
-                    if (hasMoved) {
-                        const finalX = spotEl.style.left;
-                        const finalY = spotEl.style.top;
-                        
-                        // 替換資訊面板為複製座標的提示
-                        document.getElementById('hotspot-title').innerHTML = `<i class="fas fa-tools mr-2"></i>座標校正完成`;
-                        document.getElementById('hotspot-desc').innerHTML = `請將 <b>${spot.title}</b> 更新為：<br><code class="bg-gray-800 text-green-400 px-3 py-2 rounded mt-2 inline-block font-mono">x: '${finalX}', y: '${finalY}'</code>`;
-                        panel.classList.remove('hidden');
-                        panel.classList.add('animate-[fadeIn_0.2s_ease-in-out]');
-                    } else {
-                        // 單純點擊，恢復原有的資訊顯示
-                        showDetail(e);
-                    }
-                };
-
-                spotEl.addEventListener('mousedown', startDrag);
-                document.addEventListener('mousemove', doDrag);
-                document.addEventListener('mouseup', stopDrag);
-
-                spotEl.addEventListener('touchstart', startDrag, {passive: false});
-                document.addEventListener('touchmove', doDrag, {passive: false});
-                document.addEventListener('touchend', stopDrag);
-                // ---------------------------
-
                 const showDetail = (e) => {
-                    if (isDragging) return; 
                     document.getElementById('hotspot-title').innerHTML = `<i class="fas ${spot.icon} mr-2"></i>${spot.title}`;
                     document.getElementById('hotspot-desc').textContent = spot.desc;
                     panel.classList.remove('hidden');
@@ -744,8 +677,8 @@
                     if(e) e.stopPropagation(); 
                 };
                 
-                // 保留 hover 功能顯示基礎資訊
                 spotEl.addEventListener('mouseenter', showDetail);
+                spotEl.addEventListener('click', showDetail);
 
                 scene.appendChild(spotEl);
             });
