@@ -371,10 +371,22 @@
             const orderedImages = ['north', 'east', 'south', 'central'].map(id => gameItems.find(item => item.id === id));
             orderedImages.forEach(item => {
                 const node = document.createElement('div');
-                node.className = `game-card w-48 h-40 ${item.style} rounded-2xl shadow-lg flex flex-col items-center justify-center text-white border-4 border-transparent p-4 text-center z-10 bg-cover bg-center`;
-                node.style.backgroundImage = `url('${encodeURI(item.bgImg)}')`;
+                // 移除固定寬高(w-48 h-40)與背景圖設定，改用 flex-1 與 max-w 彈性變動
+                node.className = `game-card w-full md:flex-1 max-w-[200px] mx-auto ${item.style} rounded-2xl shadow-lg flex items-center justify-center border-4 border-transparent p-0 z-10 overflow-hidden relative`;
                 node.dataset.type = 'image';
                 node.dataset.id = item.id;
+                
+                // 插入 img 標籤讓容器自動貼合圖片比例 (w-full h-auto)，且不裁切 (object-contain)
+                const img = document.createElement('img');
+                img.src = encodeURI(item.bgImg);
+                img.className = 'w-full h-auto object-contain pointer-events-none';
+                img.style.maxWidth = '100%';
+                img.alt = item.name.replace('<br>', '');
+                
+                // 確保圖片載入完成後，重新計算連線位置
+                img.onload = resizeCanvas; 
+                
+                node.appendChild(img);
                 node.addEventListener('click', () => handleGameClick(node));
                 imagesRow.appendChild(node);
             });
@@ -382,10 +394,11 @@
             const orderedLabels = ['central', 'north', 'east', 'south'].map(id => gameItems.find(item => item.id === id));
             orderedLabels.forEach(item => {
                 const node = document.createElement('div');
-                node.className = `game-card w-48 h-24 bg-white rounded-xl shadow-md border-4 border-gray-200 flex items-center justify-center text-center px-2 py-4 z-10`;
+                // 標籤卡片也改為彈性寬度，對齊上方的圖片卡片
+                node.className = `game-card w-full md:flex-1 max-w-[200px] mx-auto min-h-[6rem] bg-white rounded-xl shadow-md border-4 border-gray-200 flex items-center justify-center text-center px-2 py-4 z-10`;
                 node.dataset.type = 'label';
                 node.dataset.id = item.id;
-                node.innerHTML = `<span class="font-bold text-[#2c3e50] leading-snug">${item.name}</span>`;
+                node.innerHTML = `<span class="font-bold text-[#2c3e50] leading-snug text-sm md:text-base">${item.name}</span>`;
                 node.addEventListener('click', () => handleGameClick(node));
                 labelsRow.appendChild(node);
             });
