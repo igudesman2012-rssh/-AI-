@@ -8,7 +8,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { font-family: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif; background-color: #f8f6f0; color: #333; }
-        .scene-container { position: relative; width: 100%; height: 350px; background: linear-gradient(to bottom, #dbeafe 0%, #bfdbfe 100%); border-radius: 0.5rem; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
+        /* 移除固定高度，改由 Tailwind 的 aspect-video 控制比例 */
+        .scene-container { position: relative; width: 100%; background: linear-gradient(to bottom, #dbeafe 0%, #bfdbfe 100%); border-radius: 0.5rem; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
         
         .hotspot { position: absolute; cursor: grab; transition: transform 0.2s, box-shadow 0.2s; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: bold; user-select: none; z-index: 20; }
         .hotspot:active { cursor: grabbing; transition: none; }
@@ -44,7 +45,7 @@
             height: 100%;
             background-size: cover;
             background-position: center;
-            background-repeat: no-repeat; /* 加入這行防止圖片重複 */
+            background-repeat: no-repeat;
         }
         .carousel-btn {
             position: absolute;
@@ -82,8 +83,8 @@
         .indicator.active { background-color: white; }
         
         .carousel-container {
-            touch-action: pan-y pinch-zoom; /* Allow vertical scrolling but prevent browser horizontal swipe actions */
-            overflow: hidden; /* Hide the overflow from the image track */
+            touch-action: pan-y pinch-zoom;
+            overflow: hidden;
         }
         
         .hotspot-container {
@@ -114,8 +115,7 @@
                 <span class="font-bold text-lg text-[#1abc9c]"><i class="fas fa-gamepad mr-2"></i>暖身：連連看</span>
                 <span class="text-xs text-gray-400 mt-1 truncate w-full">測驗你的能源地理知識</span>
             </button>
-            <!-- Region buttons injected by JS -->
-        </div>
+            </div>
         <div class="mt-auto p-4 hidden md:block">
             <div class="bg-gray-800 p-4 rounded text-sm text-gray-300">
                 <i class="fas fa-info-circle text-[#16a085] mb-2 text-lg"></i>
@@ -126,7 +126,6 @@
 
     <main class="flex-1 flex flex-col h-screen overflow-hidden bg-[#f8f6f0] relative">
         
-        <!-- Game View -->
         <div id="game-view" class="absolute inset-0 flex flex-col items-center pt-10 md:pt-20 px-4 overflow-y-auto bg-slate-50 z-10">
             <div class="text-center mb-10 max-w-2xl">
                 <h2 class="text-4xl font-bold text-[#2c3e50] mb-3">能源知多少？</h2>
@@ -151,7 +150,6 @@
             </div>
         </div>
 
-        <!-- Dashboard Content View -->
         <div id="dashboard-view" class="hidden flex-1 flex-col h-full">
             <header class="bg-white shadow-sm p-6 flex flex-col md:flex-row justify-between items-start md:items-center z-10 shrink-0">
                 <div>
@@ -169,22 +167,19 @@
                         <p id="intro-paragraph" class="text-gray-700 leading-relaxed text-lg"></p>
                     </div>
 
-                    <!-- Interactive Scene with Carousel -->
                     <div class="bg-white rounded-xl shadow-md overflow-hidden">
                         <div class="p-4 bg-gray-50 border-b border-gray-100 flex justify-between items-center relative z-20">
                             <h4 class="font-bold text-gray-700"><i class="fas fa-map-marked-alt mr-2 text-[#e67e22]"></i>環境與爭議互動圖解</h4>
                             <span class="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded">點擊圖示查看詳情，滑動查看不同場景</span>
                         </div>
-                        <div class="scene-container relative carousel-container" id="scene-container">
-                            <!-- Image Carousel Container -->
+                        
+                        <div class="scene-container relative carousel-container aspect-video" id="scene-container">
                             <div id="carousel-images" class="carousel-images absolute inset-0 z-0"></div>
                             
-                            <!-- Carousel Controls -->
                             <button id="carousel-prev" class="carousel-btn carousel-btn-prev hidden !z-40"><i class="fas fa-chevron-left"></i></button>
                             <button id="carousel-next" class="carousel-btn carousel-btn-next hidden !z-40"><i class="fas fa-chevron-right"></i></button>
                             <div id="carousel-indicators" class="carousel-indicators hidden !z-40"></div>
 
-                            <!-- Hotspots Container -->
                             <div id="interactive-scene" class="hotspot-container"></div>
                         </div>
                         
@@ -253,9 +248,10 @@
             north: {
                 id: 'north', title: '台灣北部', subtitle: '基隆協和電廠燃氣改建案 (四接)', energyType: '燃氣發電 (LNG)',
                 intro: '本區段探討基隆外木山海岸的重大能源轉型計畫。為配合國家減碳政策，協和電廠擬將高污染的燃油機組改建為燃氣機組，並計畫填海造陸興建第四天然氣接收站（四接）。此舉引發了穩定北台灣供電、保護珍貴珊瑚礁生態以及維持當地漁民生計之間的強烈衝突，成為近年台灣最受矚目的環境運動之一。',
+                // 修改處：將陣列改為包含樣式設定的物件
                 sceneBgs: [
-                    'url("https://raw.githubusercontent.com/igudesman2012-rssh/-AI-/main/01-圖片/01-北部基隆協和電廠可用圖片/01-協和電廠四接(填海造陸)預定範圍.jpg")',
-                    'url("https://raw.githubusercontent.com/igudesman2012-rssh/-AI-/main/01-圖片/01-北部基隆協和電廠可用圖片/05-外木山海岸從外木山漁港連接另一頭是大武崙漁港，構成基隆人的海岸文化。（攝影林吉洋）.jpg")'
+                    { url: 'url("https://raw.githubusercontent.com/igudesman2012-rssh/-AI-/main/01-圖片/01-北部基隆協和電廠可用圖片/01-協和電廠四接(填海造陸)預定範圍.jpg")', size: 'cover' },
+                    { url: 'url("https://raw.githubusercontent.com/igudesman2012-rssh/-AI-/main/01-圖片/01-北部基隆協和電廠可用圖片/05-外木山海岸從外木山漁港連接另一頭是大武崙漁港，構成基隆人的海岸文化。（攝影林吉洋）.jpg")', size: 'cover' }
                 ],
                 hotspots: [
                     { id: 'plant', x: '63%', y: '40%', icon: 'fa-industry', color: 'bg-gray-700 text-white', title: '協和電廠', desc: '現有燃油機組，計畫轉型為燃氣發電以減少空汙。' },
@@ -276,9 +272,10 @@
             central: {
                 id: 'central', title: '台灣中部', subtitle: '彰濱離岸風電 vs 白海豚棲地', energyType: '離岸風力發電',
                 intro: '台灣中部的彰化外海擁有世界級的優良風場，是政府推動離岸風電的重鎮。然而，風場開發區域與瀕臨絕種的「台灣白海豚」重要棲息地高度重疊，且大面積的海域佔用與施工嚴重衝擊彰化沿海的傳統漁業。此區域展現了綠色能源發展與本土特有種保育、傳統產業間的巨大摩擦。',
+                // 修改處
                 sceneBgs: [
-                    'url("https://raw.githubusercontent.com/igudesman2012-rssh/-AI-/main/01-圖片/02-中部彰濱離岸風電可用圖片/03-風電預定地、白海豚棲地、漁民捕魚區.jpg")',
-                    'url("https://raw.githubusercontent.com/igudesman2012-rssh/-AI-/main/01-圖片/02-中部彰濱離岸風電可用圖片/05-離岸風電機.jpg")'
+                    { url: 'url("https://raw.githubusercontent.com/igudesman2012-rssh/-AI-/main/01-圖片/02-中部彰濱離岸風電可用圖片/03-風電預定地、白海豚棲地、漁民捕魚區.jpg")', size: 'cover' },
+                    { url: 'url("https://raw.githubusercontent.com/igudesman2012-rssh/-AI-/main/01-圖片/02-中部彰濱離岸風電可用圖片/05-離岸風電機.jpg")', size: 'cover' }
                 ],
                 hotspots: [
                     { id: 'windfarm', x: '33%', y: '19%', icon: 'fa-fan', color: 'bg-white text-blue-600 hotspot-pulse', title: '離岸風場預定/施工區', desc: '大規模設立風機，打樁噪音與震動對海洋生物造成嚴重影響。' },
@@ -298,9 +295,10 @@
             south: {
                 id: 'south', title: '台灣南部', subtitle: '嘉南漁電共生 vs 漁民權益與生態', energyType: '太陽能光電',
                 intro: '嘉義與台南沿海擁有廣大漁塭，成為政府推動「漁電共生」熱區。政策本意是「養殖為主、綠能為輔」，讓土地雙重利用。然而，龐大光電利益導致地主大幅調漲租金或拒租給原承租漁民，引發「假養殖、真種電」爭議，同時也威脅到在此覓食的黑面琵鷺等候鳥生態。',
+                // 修改處
                 sceneBgs: [
-                    'url("https://raw.githubusercontent.com/igudesman2012-rssh/-AI-/main/01-圖片/03-南部嘉南魚電共生可用圖片/12-嘉義布袋國家重要濕地、風景區與太陽能發電開發區之重疊關係圖_來源-台灣黑面琵鷺保育學會.jpg")',
-                    'url("https://raw.githubusercontent.com/igudesman2012-rssh/-AI-/main/01-圖片/03-南部嘉南魚電共生可用圖片/04-太陽能板類型.png")'
+                    { url: 'url("https://raw.githubusercontent.com/igudesman2012-rssh/-AI-/main/01-圖片/03-南部嘉南魚電共生可用圖片/12-嘉義布袋國家重要濕地、風景區與太陽能發電開發區之重疊關係圖_來源-台灣黑面琵鷺保育學會.jpg")', size: 'cover' },
+                    { url: 'url("https://raw.githubusercontent.com/igudesman2012-rssh/-AI-/main/01-圖片/03-南部嘉南魚電共生可用圖片/04-太陽能板類型.png")', size: 'cover' }
                 ],
                 hotspots: [
                     { id: 'panel', x: '55%', y: '18%', icon: 'fa-solar-panel', color: 'bg-gray-800 text-blue-400 hotspot-pulse', title: '光電板', desc: '大面積覆蓋漁塭，改變水溫與日照，影響養殖條件。' },
@@ -320,7 +318,14 @@
             east: {
                 id: 'east', title: '台灣東部', subtitle: '花蓮和平海洋溫差發電 vs 破壞', energyType: '海洋溫差發電',
                 intro: '台灣東部海岸地形陡峭，具備表層溫海與深層冷海的顯著溫差，是發展「海洋溫差發電」絕佳潛力區。近期在花蓮和平電廠推動相關計畫。這項零碳排終極綠能，在佈放巨型深水管線及大規模抽取、排放海水時，仍面臨對局部海洋環境未知衝擊的疑慮。',
-                sceneBgs: ['url("https://raw.githubusercontent.com/igudesman2012-rssh/-AI-/main/01-%E5%9C%96%E7%89%87/04-%E6%9D%B1%E9%83%A8%E8%8A%B1%E8%93%AE%E5%92%8C%E5%B9%B3%E9%9B%BB%E5%BB%A0%E6%BA%AB%E5%B7%AE%E7%99%BC%E9%9B%BB/06-%E6%B5%B7%E5%BA%95%E6%8A%BD%E6%B7%B1%E6%B5%B7%E5%86%B7%E6%B0%B4%E7%AE%A1%E7%B7%9A%E6%9E%B6%E8%A8%AD.png")'],
+                // 修改處：將東部的特殊樣式直接包裝在資料裡
+                sceneBgs: [
+                    { 
+                        url: 'url("https://raw.githubusercontent.com/igudesman2012-rssh/-AI-/main/01-%E5%9C%96%E7%89%87/04-%E6%9D%B1%E9%83%A8%E8%8A%B1%E8%93%AE%E5%92%8C%E5%B9%B3%E9%9B%BB%E5%BB%A0%E6%BA%AB%E5%B7%AE%E7%99%BC%E9%9B%BB/06-%E6%B5%B7%E5%BA%95%E6%8A%BD%E6%B7%B1%E6%B5%B7%E5%86%B7%E6%B0%B4%E7%AE%A1%E7%B7%9A%E6%9E%B6%E8%A8%AD.png")', 
+                        size: 'contain', 
+                        bg: '#020617' 
+                    }
+                ],
                 hotspots: [
                     { id: 'plant', x: '36%', y: '22%', icon: 'fa-building', color: 'bg-gray-400 text-gray-900', title: '溫差發電設施', desc: '利用溫差轉換熱能發電的陸上或近海設施。' },
                     { id: 'discharge', x: '57%', y: '78%', icon: 'fa-water', color: 'bg-cyan-500 text-white', title: '低溫尾水排放區', desc: '排放大量低溫海水，可能改變水溫層影響表層生物。' },
@@ -372,19 +377,16 @@
             const orderedImages = ['north', 'east', 'south', 'central'].map(id => gameItems.find(item => item.id === id));
             orderedImages.forEach(item => {
                 const node = document.createElement('div');
-                // 移除固定寬高(w-48 h-40)與背景圖設定，改用 flex-1 與 max-w 彈性變動
                 node.className = `game-card w-full md:flex-1 max-w-[200px] mx-auto ${item.style} rounded-2xl shadow-lg flex items-center justify-center border-4 border-transparent p-0 z-10 overflow-hidden relative`;
                 node.dataset.type = 'image';
                 node.dataset.id = item.id;
                 
-                // 插入 img 標籤讓容器自動貼合圖片比例 (w-full h-auto)，且不裁切 (object-contain)
                 const img = document.createElement('img');
                 img.src = encodeURI(item.bgImg);
                 img.className = 'w-full h-auto object-contain pointer-events-none';
                 img.style.maxWidth = '100%';
                 img.alt = item.name.replace('<br>', '');
                 
-                // 確保圖片載入完成後，重新計算連線位置
                 img.onload = resizeCanvas; 
                 
                 node.appendChild(img);
@@ -395,7 +397,6 @@
             const orderedLabels = ['central', 'north', 'east', 'south'].map(id => gameItems.find(item => item.id === id));
             orderedLabels.forEach(item => {
                 const node = document.createElement('div');
-                // 標籤卡片也改為彈性寬度，對齊上方的圖片卡片
                 node.className = `game-card w-full md:flex-1 max-w-[200px] mx-auto min-h-[6rem] bg-white rounded-xl shadow-md border-4 border-gray-200 flex items-center justify-center text-center px-2 py-4 z-10`;
                 node.dataset.type = 'label';
                 node.dataset.id = item.id;
@@ -555,7 +556,6 @@
             const carouselContainer = document.getElementById('scene-container');
             
             carouselContainer.addEventListener('touchstart', (e) => {
-                // Ensure we don't interfere with hotspot dragging if they are being dragged
                 if (e.target.closest('.hotspot')) return; 
                 touchStartX = e.changedTouches[0].screenX;
             }, { passive: true });
@@ -568,14 +568,11 @@
         }
 
         function handleSwipeGesture() {
-            // Determine swipe direction and trigger navigation if swipe is significant enough
             const swipeThreshold = 50; 
             if (touchEndX < touchStartX - swipeThreshold) {
-                // Swiped Left - go to next
                 navigateCarousel(1);
             }
             if (touchEndX > touchStartX + swipeThreshold) {
-                // Swiped Right - go to prev
                 navigateCarousel(-1);
             }
         }
@@ -591,18 +588,17 @@
             currentCarouselIndex = 0;
 
             if (currentRegionData && currentRegionData.sceneBgs && currentRegionData.sceneBgs.length > 0) {
-                currentRegionData.sceneBgs.forEach((bgUrl, index) => {
-                    // Add Image
+                // 修改處：根據新的物件結構提取資料，避免寫死條件
+                currentRegionData.sceneBgs.forEach((bgData, index) => {
                     const imgDiv = document.createElement('div');
                     imgDiv.className = 'carousel-img';
-                    imgDiv.style.backgroundImage = bgUrl;
-                    if(currentRegionData.id === 'east') {
-                       imgDiv.style.backgroundSize = 'contain';
-                       imgDiv.style.backgroundColor = '#020617';
+                    imgDiv.style.backgroundImage = bgData.url;
+                    imgDiv.style.backgroundSize = bgData.size || 'cover';
+                    if (bgData.bg) {
+                        imgDiv.style.backgroundColor = bgData.bg;
                     }
                     carouselContainer.appendChild(imgDiv);
 
-                    // Add Indicator
                     if (currentRegionData.sceneBgs.length > 1) {
                         const indicator = document.createElement('div');
                         indicator.className = `indicator ${index === 0 ? 'active' : ''}`;
@@ -611,7 +607,6 @@
                     }
                 });
 
-                // Show/Hide controls based on image count
                 if (currentRegionData.sceneBgs.length > 1) {
                     prevBtn.classList.remove('hidden');
                     nextBtn.classList.remove('hidden');
@@ -645,7 +640,6 @@
             const container = document.getElementById('carousel-images');
             container.style.transform = `translateX(-${currentCarouselIndex * 100}%)`;
             
-            // Update indicators
             const indicators = document.querySelectorAll('#carousel-indicators .indicator');
             indicators.forEach((ind, index) => {
                 if (index === currentCarouselIndex) ind.classList.add('active');
@@ -657,7 +651,6 @@
                 sceneContainer.classList.remove('hidden-hotspots');
             } else {
                 sceneContainer.classList.add('hidden-hotspots');
-                // Also hide the detail panel if it was open
                 document.getElementById('hotspot-detail').classList.add('hidden');
             }
         }
@@ -672,7 +665,6 @@
             regionData.hotspots.forEach(spot => {
                 const spotEl = document.createElement('div');
                 spotEl.className = `hotspot ${spot.color} rounded-full w-12 h-12 text-xl shadow-lg pointer-events-auto`;
-                // Use transform to center the hotspot on its coordinate
                 spotEl.style.left = spot.x;
                 spotEl.style.top = spot.y;
                 spotEl.style.transform = 'translate(-50%, -50%)';
@@ -683,7 +675,6 @@
                     document.getElementById('hotspot-desc').textContent = spot.desc;
                     panel.classList.remove('hidden');
                     panel.classList.add('animate-[fadeIn_0.2s_ease-in-out]');
-                    // Prevent click from propagating to carousel buttons if positioned over them
                     if(e) e.stopPropagation(); 
                 };
                 spotEl.addEventListener('mouseenter', showDetail);
