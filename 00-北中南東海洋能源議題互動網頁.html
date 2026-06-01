@@ -348,10 +348,10 @@
         
         // --- GAME LOGIC ---
         const gameItems = [
-            { id: 'north', name: '北部-基隆<br>協和火力電廠', style: 'bg-slate-800', bgImg: 'https://raw.githubusercontent.com/igudesman2012-rssh/-AI-/main/01-圖片/01-北部基隆協和電廠可用圖片/04-電廠場景.jpg', imgDesc: '海岸旁的火力發電廠與煙囪' },
-            { id: 'east', name: '東部-花蓮<br>和平火力電廠', style: 'bg-gray-700', bgImg: 'https://raw.githubusercontent.com/igudesman2012-rssh/-AI-/main/01-圖片/04-東部花蓮和平電廠溫差發電/01-花蓮和平電廠.webP', imgDesc: '花蓮海岸與大型發電廠設施' },
-            { id: 'south', name: '南部-台南<br>七股魚電共生', style: 'bg-blue-600', bgImg: 'https://raw.githubusercontent.com/igudesman2012-rssh/-AI-/main/01-圖片/03-南部嘉南魚電共生可用圖片/01-太陽能板.jpg', imgDesc: '水面佈滿大面積太陽能光電板' },
-            { id: 'central', name: '中部-彰濱工業區<br>離岸風電場', style: 'bg-sky-600', bgImg: 'https://raw.githubusercontent.com/igudesman2012-rssh/-AI-/main/01-圖片/02-中部彰濱離岸風電可用圖片/01-中部-彰濱離岸風電.jpg', icon: 'fa-fan', imgDesc: '海岸與海面上豎立著大型風機' }
+            { id: 'north', name: '北部-基隆<br>協和火力電廠', style: 'bg-slate-800', bgImg: 'https://raw.githubusercontent.com/igudesman2012-rssh/-AI-/main/01-圖片/01-北部基隆協和電廠可用圖片/04-電廠場景.jpg' },
+            { id: 'east', name: '東部-花蓮<br>和平火力電廠', style: 'bg-gray-700', bgImg: 'https://raw.githubusercontent.com/igudesman2012-rssh/-AI-/main/01-圖片/04-東部花蓮和平電廠溫差發電/01-花蓮和平電廠.webP'},
+            { id: 'south', name: '南部-台南<br>七股魚電共生', style: 'bg-blue-600', bgImg: 'https://raw.githubusercontent.com/igudesman2012-rssh/-AI-/main/01-圖片/03-南部嘉南魚電共生可用圖片/01-太陽能板.jpg' },
+            { id: 'central', name: '中部-彰濱工業區<br>離岸風電場', style: 'bg-sky-600', bgImg: 'https://raw.githubusercontent.com/igudesman2012-rssh/-AI-/main/01-圖片/02-中部彰濱離岸風電可用圖片/01-中部-彰濱離岸風電.jpg' }
         ];
 
         let selectedNode = null;
@@ -371,12 +371,10 @@
             const orderedImages = ['north', 'east', 'south', 'central'].map(id => gameItems.find(item => item.id === id));
             orderedImages.forEach(item => {
                 const node = document.createElement('div');
-                node.className = `game-card w-48 h-40 ${item.style} rounded-2xl shadow-lg flex flex-col items-center justify-center text-white border-4 border-transparent p-4 text-center z-10 bg-cover bg-center bg-blend-overlay`;
+                node.className = `game-card w-48 h-40 ${item.style} rounded-2xl shadow-lg flex flex-col items-center justify-center text-white border-4 border-transparent p-4 text-center z-10 bg-cover bg-center`;
                 node.style.backgroundImage = `url('${encodeURI(item.bgImg)}')`;
-                node.style.backgroundColor = 'rgba(30, 41, 59, 0.7)'; 
                 node.dataset.type = 'image';
                 node.dataset.id = item.id;
-                node.innerHTML = `<i class="fas ${item.icon || 'fa-image'} text-4xl mb-3 opacity-90 drop-shadow-md"></i><span class="text-sm font-bold opacity-90 drop-shadow-md">${item.imgDesc}</span>`;
                 node.addEventListener('click', () => handleGameClick(node));
                 imagesRow.appendChild(node);
             });
